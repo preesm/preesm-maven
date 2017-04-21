@@ -5,7 +5,7 @@ Default configuration looks as follows:
 
 ```xml
 <plugin>
-	<groupId>org.ietr.externaldeps</groupId>
+	<groupId>org.ietr.maven</groupId>
 	<artifactId>sftp-maven-plugin</artifactId>
 	<version>1.0.0</version>
 	<executions>
