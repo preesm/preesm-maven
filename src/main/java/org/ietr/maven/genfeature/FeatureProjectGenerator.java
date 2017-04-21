@@ -51,7 +51,8 @@ public class FeatureProjectGenerator {
     final StringBuilder buffer = new StringBuilder();
     buffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     buffer.append("\n");
-    buffer.append("<feature id=\"" + generateAllInOneP2Feature.project.getGroupId() + ".").append(generateAllInOneP2Feature.featureId)
+    buffer.append("<feature id=\"" + generateAllInOneP2Feature.project.getGroupId() + ".").append(generateAllInOneP2Feature.featureId).append("\" label=\"")
+        .append(generateAllInOneP2Feature.featureName)
         .append("\" version=\"" + generateAllInOneP2Feature.project.getVersion() + "\" provider-name=\"" + generateAllInOneP2Feature.featureProvider + "\">\n");
     buffer.append("\n");
     for (final PluginIU plugin : pluginList) {
