@@ -72,8 +72,25 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
+  public final boolean exists(final String remotePath) {
+    try {
+      this.mainSftpChannel.lstat(remotePath);
+      return true;
+    } catch (final SftpException e) {
+      if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
+        return false;
+      } else {
+        throw new org.ietr.maven.sftptransfert.SftpException("Could not test if file exists", e);
+      }
+    }
+  }
+
+  @Override
   public final boolean isDirectory(final String remoteDirPath) {
     try {
+      if (!exists(remoteDirPath)) {
+        return false;
+      }
       final SftpATTRS lstat = lsAttrsCache(remoteDirPath);
       return lstat.isDir();
     } catch (final SftpException e) {
@@ -84,6 +101,9 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   @Override
   public final boolean isSymlink(final String remotePath) {
     try {
+      if (!exists(remotePath)) {
+        return false;
+      }
       final SftpATTRS lstat = lsAttrsCache(remotePath);
       return lstat.isLink();
     } catch (final SftpException e) {

@@ -9,6 +9,8 @@ public interface ISftpTransfertLayer {
 
   public boolean isConnected();
 
+  public boolean exists(final String remotePath);
+
   /**
    * Returns false if the path points to a symlink
    */
