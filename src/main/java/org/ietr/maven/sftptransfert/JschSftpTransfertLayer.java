@@ -11,9 +11,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,24 +210,6 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public final void mkdirs(final String remoteDirPath) {
-    final Path remoteDestinationDir = Paths.get(remoteDirPath);
-    final Deque<String> parents = new ArrayDeque<>();
-    Path parent = remoteDestinationDir;
-    while (parent != null) {
-      parents.push(parent.toAbsolutePath().toString());
-      parent = parent.getParent();
-    }
-    while (!parents.isEmpty()) {
-      final String currentParentToTest = parents.pop();
-      final boolean existDir = isDirectory(currentParentToTest);
-      if (!existDir) {
-        mkdir(currentParentToTest);
-      }
-    }
-  }
-
-  @Override
   public final String readSymlink(final String remotePath) {
     String readlink;
     try {
@@ -254,7 +234,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.put(localFilePath, remoteFilePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Send failed : " + e.getMessage(), e);
+      throw new TransfertException("Send failed [" + localFilePath + " to " + remoteFilePath + "] : " + e.getMessage(), e);
     }
   }
 

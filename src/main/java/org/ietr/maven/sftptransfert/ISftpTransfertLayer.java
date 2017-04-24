@@ -27,8 +27,6 @@ public interface ISftpTransfertLayer {
 
   public void mkdir(final String remoteDirPath);
 
-  public void mkdirs(final String remoteDirPath);
-
   public String readSymlink(final String remotePath);
 
   public void receive(final String remoteFilePath, final String localFilePath);

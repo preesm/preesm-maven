@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.plugin.MojoFailureException;
@@ -52,12 +54,6 @@ public abstract class SftpConnection {
     return this.connect.isConnected();
   }
 
-  private static final String cleanupPath(final String remoteDirPath) {
-    final String separatorsToUnix = FilenameUtils.separatorsToUnix(remoteDirPath);
-    final int prefixLength = FilenameUtils.getPrefixLength(separatorsToUnix);
-    return separatorsToUnix.substring(prefixLength - 1);
-  }
-
   public final void receive(final String remotePath, final String localPath) throws MojoFailureException {
     testConnection();
     try {
@@ -91,10 +87,7 @@ public abstract class SftpConnection {
 
   private void receiveDir(final String remotePath, final String localPath) throws IOException {
     final Path localDirPath = FileSystems.getDefault().getPath(localPath);
-    final Path localParentDirPath = localDirPath.getParent();
-    if (localParentDirPath != null) {
-      Files.createDirectories(localParentDirPath);
-    }
+    Files.createDirectories(localDirPath);
 
     final List<String> ls = this.connect.ls(remotePath);
     ls.forEach(s -> {
@@ -166,14 +159,15 @@ public abstract class SftpConnection {
     final Path remoteParentPath = remoteDirPath.getParent();
     final String remoteParentPathString = SftpConnection.cleanupPath(remoteParentPath.toString());
     if (!this.fastChecks) {
-      this.connect.mkdirs(remoteParentPathString);
+      mkdirs(remoteParentPathString);
       this.fastChecks = true;
       this.fastCheckDirLevel = this.dirLevel;
     }
 
-    final boolean isDirectory = this.connect.isDirectory(remotePath);
-    if (!isDirectory) {
-      this.connect.mkdir(remotePath);
+    final String remotePathString = SftpConnection.cleanupPath(remoteDirPath.toString());
+    final boolean exists = this.connect.exists(remotePathString);
+    if (!exists) {
+      this.connect.mkdir(remotePathString);
     }
 
     final Path path = FileSystems.getDefault().getPath(localPath);
@@ -198,7 +192,7 @@ public abstract class SftpConnection {
     final String remoteParentPathString = SftpConnection.cleanupPath(remoteParentPath.toString());
 
     if (!this.fastChecks) {
-      this.connect.mkdirs(remoteParentPathString);
+      mkdirs(remoteParentPathString);
     }
     this.connect.send(localPath, remotePath);
   }
@@ -212,9 +206,34 @@ public abstract class SftpConnection {
     final String remoteParentPathString = SftpConnection.cleanupPath(remoteParentPath.toString());
 
     if (!this.fastChecks) {
-      this.connect.mkdirs(remoteParentPathString);
+      mkdirs(remoteParentPathString);
     }
     this.connect.writeSymlink(remotePath, localSymbolicLinkStringValue);
+  }
+
+  private final void mkdirs(final String remoteDirPath) {
+    final Path remoteDestinationDir = Paths.get(remoteDirPath);
+    final Deque<String> parents = new ArrayDeque<>();
+    Path parent = remoteDestinationDir;
+    while (parent != null) {
+      final String parentString = parent.toAbsolutePath().toString();
+      final String cleanedPath = SftpConnection.cleanupPath(parentString);
+      parents.push(cleanedPath);
+      parent = parent.getParent();
+    }
+    while (!parents.isEmpty()) {
+      final String currentParentToTest = parents.pop();
+      final boolean existDir = this.connect.exists(currentParentToTest);
+      if (!existDir) {
+        this.connect.mkdir(currentParentToTest);
+      }
+    }
+  }
+
+  private static final String cleanupPath(final String remoteDirPath) {
+    final int prefixLength = FilenameUtils.getPrefixLength(remoteDirPath);
+    final String separatorsToUnix = FilenameUtils.separatorsToUnix(remoteDirPath);
+    return separatorsToUnix.substring(prefixLength - 1);
   }
 
   private void testConnection() throws MojoFailureException {
