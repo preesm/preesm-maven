@@ -80,11 +80,14 @@ public final class SftpTransfertMojo extends AbstractMojo {
     }
 
     final SftpConnection sftpTransfert = new SftpConnection(log, sftpUser, sftpHost, sftpPort, sftpPassword, this.strictHostKeyChecking);
-    if (receivingMode) {
-      sftpTransfert.receive(this.remotePath, this.localPath);
-    } else {
-      sftpTransfert.send(this.localPath, this.remotePath);
+    try {
+      if (receivingMode) {
+        sftpTransfert.receive(this.remotePath, this.localPath);
+      } else {
+        sftpTransfert.send(this.localPath, this.remotePath);
+      }
+    } finally {
+      sftpTransfert.disconnect();
     }
-    sftpTransfert.disconnect();
   }
 }
