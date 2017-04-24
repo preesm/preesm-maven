@@ -32,8 +32,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   public static final JschSftpTransfertLayer build() {
-    final JschSftpTransfertLayer jschSftpConnection = new JschSftpTransfertLayer();
-    return jschSftpConnection;
+    return new JschSftpTransfertLayer();
   }
 
   @Override
