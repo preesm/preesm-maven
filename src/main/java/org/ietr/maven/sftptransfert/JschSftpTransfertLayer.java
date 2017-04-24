@@ -7,6 +7,8 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
+import java.io.FileNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
@@ -15,6 +17,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
@@ -31,17 +34,52 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   public static final JschSftpTransfertLayer connect(final String host, final int port, final String user, final String password,
       final boolean strictHostKeyChecking) {
     final JschSftpTransfertLayer jschSftpConnection = new JschSftpTransfertLayer();
-    jschSftpConnection.connectTo(host, port, user, password, strictHostKeyChecking);
+    jschSftpConnection.connectUsingPassword(host, port, user, password, strictHostKeyChecking);
     return jschSftpConnection;
   }
 
   @Override
-  public final void connectTo(final String host, final int port, final String user, final String password, final boolean strictHostKeyChecking) {
+  public final void connectUsingKey(final String host, final int port, final String user, final String keyPath, final boolean strictHostKeyChecking) {
+    connectTo(host, port, user, null, keyPath, null, strictHostKeyChecking);
+  }
+
+  @Override
+  public void connectUsingKeyWithPassPhrase(final String host, final int port, final String user, final String keyPath, final String passPhrase,
+      final boolean strictHostKeyChecking) {
+    connectTo(host, port, user, null, keyPath, passPhrase, strictHostKeyChecking);
+  }
+
+  @Override
+  public final void connectUsingPassword(final String host, final int port, final String user, final String password, final boolean strictHostKeyChecking) {
+    connectTo(host, port, user, password, null, null, strictHostKeyChecking);
+  }
+
+  public final void connectTo(final String host, final int port, final String user, final String password, final String keyPath, final String keyPassphrase,
+      final boolean strictHostKeyChecking) {
+    if (this.connected) {
+      throw new TransfertException("Already connected");
+    }
     try {
       final JSch jsch = new JSch();
-      this.session = jsch.getSession(user, host, port);
-      this.session.setPassword(password);
-      final java.util.Properties config = new java.util.Properties();
+
+      if ((keyPath != null) && (keyPath != "")) {
+        final Path keyFilePath = FileSystems.getDefault().getPath(keyPath);
+        final boolean exists = keyFilePath.toFile().exists();
+        if (!exists) {
+          throw new FileNotFoundException("Key file " + keyPath + "not found in classpath");
+        }
+        if (keyPassphrase == null) {
+          jsch.addIdentity(keyFilePath.toAbsolutePath().toString());
+        } else {
+          jsch.addIdentity(keyPath, keyPassphrase);
+        }
+        this.session = jsch.getSession(user, host, port);
+      } else {
+        this.session = jsch.getSession(user, host, port);
+        this.session.setPassword(password);
+      }
+
+      final Properties config = new Properties();
       if (!strictHostKeyChecking) {
         // do not check for key checking
         config.put("StrictHostKeyChecking", "no");
@@ -55,8 +93,8 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
         throw new JSchException("Could not create channel", new NullPointerException());
       }
       this.mainSftpChannel.connect();
-    } catch (final JSchException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Could not connect", e);
+    } catch (final JSchException | FileNotFoundException e) {
+      throw new TransfertException("Could not connect", e);
     }
   }
 
@@ -80,7 +118,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
         return false;
       } else {
-        throw new org.ietr.maven.sftptransfert.SftpException("Could not test if file exists", e);
+        throw new TransfertException("Could not test if file exists", e);
       }
     }
   }
@@ -94,7 +132,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       final SftpATTRS lstat = lsAttrsCache(remoteDirPath);
       return lstat.isDir();
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Could not get attributes", e);
+      throw new TransfertException("Could not get attributes", e);
     }
   }
 
@@ -107,7 +145,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       final SftpATTRS lstat = lsAttrsCache(remotePath);
       return lstat.isLink();
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Could not get attributes", e);
+      throw new TransfertException("Could not get attributes", e);
     }
   }
 
@@ -139,7 +177,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
         res.add(remoteDirPath + "/" + filename);
       }
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Could not make dir", e);
+      throw new TransfertException("Could not make dir", e);
     }
 
     return res;
@@ -172,7 +210,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.mkdir(remoteDirPath);
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Could not make dir", e);
+      throw new TransfertException("Could not make dir", e);
     }
   }
 
@@ -200,7 +238,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       readlink = this.mainSftpChannel.readlink(remotePath);
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Could not read link", e);
+      throw new TransfertException("Could not read link", e);
     }
     return readlink;
   }
@@ -210,7 +248,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.get(remoteFilePath, localFilePath);
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Receive failed : " + e.getMessage(), e);
+      throw new TransfertException("Receive failed : " + e.getMessage(), e);
     }
   }
 
@@ -219,7 +257,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.put(localFilePath, remoteFilePath);
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Send failed : " + e.getMessage(), e);
+      throw new TransfertException("Send failed : " + e.getMessage(), e);
     }
   }
 
@@ -248,7 +286,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       this.mainSftpChannel.symlink(linkPath, actualLinkName);
 
     } catch (final SftpException e) {
-      throw new org.ietr.maven.sftptransfert.SftpException("Could not write link", e);
+      throw new TransfertException("Could not write link", e);
     }
   }
 
