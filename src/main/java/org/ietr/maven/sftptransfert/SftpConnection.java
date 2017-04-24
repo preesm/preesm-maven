@@ -9,6 +9,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 
 public final class SftpConnection {
 
@@ -18,6 +19,10 @@ public final class SftpConnection {
   private boolean                   fastChecks = false;
   private int                       dirLevel   = 0;
   private int                       fastCheckDirLevel;
+
+  public SftpConnection(final String sftpUser, final String sftpHost, final int sftpPort, final String sftpPassword, final boolean strictHostKeyChecking) {
+    this(new SystemStreamLog(), sftpUser, sftpHost, sftpPort, sftpPassword, strictHostKeyChecking);
+  }
 
   public SftpConnection(final Log log, final String sftpUser, final String sftpHost, final int sftpPort, final String sftpPassword,
       final boolean strictHostKeyChecking) {
