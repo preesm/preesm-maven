@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
@@ -49,6 +50,12 @@ public abstract class SftpConnection {
 
   public final boolean isConnected() {
     return this.connect.isConnected();
+  }
+
+  private static final String cleanupPath(final String remoteDirPath) {
+    final String separatorsToUnix = FilenameUtils.separatorsToUnix(remoteDirPath);
+    final int prefixLength = FilenameUtils.getPrefixLength(separatorsToUnix);
+    return separatorsToUnix.substring(prefixLength - 1);
   }
 
   public final void receive(final String remotePath, final String localPath) throws MojoFailureException {
@@ -157,7 +164,7 @@ public abstract class SftpConnection {
     this.dirLevel++;
     final Path remoteDirPath = Paths.get(remotePath);
     final Path remoteParentPath = remoteDirPath.getParent();
-    final String remoteParentPathString = remoteParentPath.toString();
+    final String remoteParentPathString = SftpConnection.cleanupPath(remoteParentPath.toString());
     if (!this.fastChecks) {
       this.connect.mkdirs(remoteParentPathString);
       this.fastChecks = true;
@@ -188,7 +195,7 @@ public abstract class SftpConnection {
   private void sendFile(final String localPath, final String remotePath) {
     final Path remoteFilePath = Paths.get(remotePath);
     final Path remoteParentPath = remoteFilePath.getParent();
-    final String remoteParentPathString = remoteParentPath.toString();
+    final String remoteParentPathString = SftpConnection.cleanupPath(remoteParentPath.toString());
 
     if (!this.fastChecks) {
       this.connect.mkdirs(remoteParentPathString);
@@ -202,7 +209,7 @@ public abstract class SftpConnection {
     final String localSymbolicLinkStringValue = localSymbolicLinkDestPath.toString();
 
     final Path remoteParentPath = localLinkPath.getParent();
-    final String remoteParentPathString = remoteParentPath.toString();
+    final String remoteParentPathString = SftpConnection.cleanupPath(remoteParentPath.toString());
 
     if (!this.fastChecks) {
       this.connect.mkdirs(remoteParentPathString);
