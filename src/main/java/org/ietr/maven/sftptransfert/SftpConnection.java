@@ -15,7 +15,6 @@ public abstract class SftpConnection {
 
   private final Log                 log;
   private final ISftpTransfertLayer connect;
-  private String                    indent     = "";
   private boolean                   fastChecks = false;
   private int                       dirLevel   = 0;
   private int                       fastCheckDirLevel;
@@ -56,7 +55,7 @@ public abstract class SftpConnection {
     testConnection();
     try {
 
-      this.log.info(this.indent + "receiving " + remotePath);
+      this.log.info("receiving " + remotePath);
 
       final boolean isDirectory = this.connect.isDirectory(remotePath);
       final boolean isSymlink = this.connect.isSymlink(remotePath);
@@ -69,10 +68,7 @@ public abstract class SftpConnection {
         if (isDirectory) {
           final String message = MessageFormat.format("Remote path {0} points to a directory. Using receiveDir().", remotePath);
           this.log.debug(message);
-          final String tmp = this.indent;
-          this.indent += "  ";
           receiveDir(remotePath, localPath);
-          this.indent = tmp;
         } else {
           final String message = MessageFormat.format("Remote path {0} points to a file. Using receiveFile().", remotePath);
           this.log.debug(message);
@@ -87,9 +83,11 @@ public abstract class SftpConnection {
   }
 
   private void receiveDir(final String remotePath, final String localPath) throws IOException {
-    final Path localDirPath = Paths.get(localPath);
+    final Path localDirPath = FileSystems.getDefault().getPath(localPath);
     final Path localParentDirPath = localDirPath.getParent();
-    Files.createDirectories(localParentDirPath);
+    if (localParentDirPath != null) {
+      Files.createDirectories(localParentDirPath);
+    }
 
     final List<String> ls = this.connect.ls(remotePath);
     ls.forEach(s -> {
@@ -127,7 +125,7 @@ public abstract class SftpConnection {
     testConnection();
     try {
 
-      this.log.info(this.indent + "sending " + localPath);
+      this.log.info("sending " + localPath);
 
       final Path path = FileSystems.getDefault().getPath(localPath);
       final boolean isDirectory = path.toFile().isDirectory();
@@ -141,10 +139,7 @@ public abstract class SftpConnection {
         if (isDirectory) {
           final String message = MessageFormat.format("Local path {0} points to a directory. Using sendDir().", localPath);
           this.log.debug(message);
-          final String tmp = this.indent;
-          this.indent += "  ";
           sendDir(localPath, remotePath);
-          this.indent = tmp;
         } else {
           final String message = MessageFormat.format("Local path {0} points to a file. Using sendFile().", localPath);
           this.log.debug(message);
