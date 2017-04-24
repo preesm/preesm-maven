@@ -31,10 +31,8 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   private JschSftpTransfertLayer() {
   }
 
-  public static final JschSftpTransfertLayer connect(final String host, final int port, final String user, final String password,
-      final boolean strictHostKeyChecking) {
+  public static final JschSftpTransfertLayer build() {
     final JschSftpTransfertLayer jschSftpConnection = new JschSftpTransfertLayer();
-    jschSftpConnection.connectUsingPassword(host, port, user, password, strictHostKeyChecking);
     return jschSftpConnection;
   }
 
@@ -54,7 +52,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     connectTo(host, port, user, password, null, null, strictHostKeyChecking);
   }
 
-  public final void connectTo(final String host, final int port, final String user, final String password, final String keyPath, final String keyPassphrase,
+  private final void connectTo(final String host, final int port, final String user, final String password, final String keyPath, final String keyPassphrase,
       final boolean strictHostKeyChecking) {
     if (this.connected) {
       throw new TransfertException("Already connected");

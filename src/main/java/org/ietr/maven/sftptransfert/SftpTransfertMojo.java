@@ -55,7 +55,7 @@ public final class SftpTransfertMojo extends AbstractMojo {
     final Server server = this.settings.getServer(this.serverId);
     if (server == null) {
       final String message = MessageFormat
-          .format("Error: Could not find server with id '{0}'. Make sure you have a <servers>...</servers> section with proper <server> "
+          .format("Error: Could not find server with id \"{0}\". Make sure you have a <servers>...</servers> section with proper <server> "
               + "configuration in your maven settings. See https://maven.apache.org/settings.html#Servers.", this.serverId);
       log.error(message);
       throw new MojoFailureException(message);
@@ -65,6 +65,9 @@ public final class SftpTransfertMojo extends AbstractMojo {
     final int sftpPort = this.serverPort;
     final String sftpUser = server.getUsername();
     final String sftpPassword = server.getPassword();
+    final String sftpPrivateKey = server.getPrivateKey();
+    final String sftpPrivateKeyPassphrase = server.getPassphrase();
+
     final boolean receivingMode;
 
     if ("receive".equals(this.mode)) {
@@ -79,7 +82,12 @@ public final class SftpTransfertMojo extends AbstractMojo {
       }
     }
 
-    final SftpConnection sftpTransfert = new SftpConnection(log, sftpUser, sftpHost, sftpPort, sftpPassword, this.strictHostKeyChecking);
+    final SftpConnection sftpTransfert;
+    if (sftpPassword != null) {
+      sftpTransfert = new PasswordSftpConnection(log, sftpUser, sftpHost, sftpPort, sftpPassword, this.strictHostKeyChecking);
+    } else {
+      sftpTransfert = new PrivateKeySftpConnection(log, sftpUser, sftpHost, sftpPort, sftpPrivateKey, sftpPrivateKeyPassphrase, this.strictHostKeyChecking);
+    }
     try {
       if (receivingMode) {
         sftpTransfert.receive(this.remotePath, this.localPath);

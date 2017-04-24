@@ -11,7 +11,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 
-public final class SftpConnection {
+public abstract class SftpConnection {
 
   private final Log                 log;
   private final ISftpTransfertLayer connect;
@@ -20,14 +20,27 @@ public final class SftpConnection {
   private int                       dirLevel   = 0;
   private int                       fastCheckDirLevel;
 
-  public SftpConnection(final String sftpUser, final String sftpHost, final int sftpPort, final String sftpPassword, final boolean strictHostKeyChecking) {
+  protected SftpConnection(final String sftpUser, final String sftpHost, final int sftpPort, final String sftpPassword, final boolean strictHostKeyChecking) {
     this(new SystemStreamLog(), sftpUser, sftpHost, sftpPort, sftpPassword, strictHostKeyChecking);
   }
 
-  public SftpConnection(final Log log, final String sftpUser, final String sftpHost, final int sftpPort, final String sftpPassword,
+  protected SftpConnection(final Log log, final String sftpUser, final String sftpHost, final int sftpPort, final String sftpPassword,
       final boolean strictHostKeyChecking) {
     this.log = log;
-    this.connect = JschSftpTransfertLayer.connect(sftpHost, sftpPort, sftpUser, sftpPassword, strictHostKeyChecking);
+    this.connect = JschSftpTransfertLayer.build();
+    this.connect.connectUsingPassword(sftpHost, sftpPort, sftpUser, sftpPassword, strictHostKeyChecking);
+  }
+
+  protected SftpConnection(final String sftpUser, final String sftpHost, final int sftpPort, final String keyPath, final String keyPassPhrase,
+      final boolean strictHostKeyChecking) {
+    this(new SystemStreamLog(), sftpUser, sftpHost, sftpPort, keyPath, keyPassPhrase, strictHostKeyChecking);
+  }
+
+  protected SftpConnection(final Log log, final String sftpUser, final String sftpHost, final int sftpPort, final String keyPath, final String keyPassPhrase,
+      final boolean strictHostKeyChecking) {
+    this.log = log;
+    this.connect = JschSftpTransfertLayer.build();
+    this.connect.connectUsingKeyWithPassPhrase(sftpHost, sftpPort, sftpUser, keyPath, keyPassPhrase, strictHostKeyChecking);
   }
 
   public final void disconnect() {
