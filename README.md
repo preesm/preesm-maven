@@ -10,19 +10,32 @@ Default configuration looks as follows:
 	<version>1.0.0</version>
 	<executions>
 		<execution>
-			<id>test-it</id>
+			<id>test-receive</id>
 			<phase>initialize</phase>
 			<configuration>
-				<!-- the server ID should be present in the Maven settings, with username
-					and password set. -->
 				<serverId>server.id</serverId>
 				<serverHost>server.host.or.ip</serverHost>
 				<!-- true by default -->
 				<strictHostKeyChecking>false</strictHostKeyChecking>
 				<!-- send or receive, receive by default -->
+				<mode>receive</mode>
+				<remotePath>/absolute/path/on/remote/host</remotePath>
+				<localPath>relative/or/absolute/local/path/</localPath>
+			</configuration>
+			<goals>
+				<goal>sftp-transfert</goal>
+			</goals>
+		</execution>
+		<execution>
+			<id>test-send</id>
+			<phase>initialize</phase>
+			<configuration>
+				<serverId>server.id</serverId>
+				<serverHost>server.host.or.ip</serverHost>
+				<strictHostKeyChecking>false</strictHostKeyChecking>
 				<mode>send</mode>
-				<remotePath>/absolute/path/on/remote/host/</remotePath>
-				<localPath>relative/or/absolute/local/path</localPath>
+				<remotePath>/home/projects/myprojects/htdcs/p2repo/</remotePath>
+				<localPath>${project.basedir}/target/repository/</localPath>
 			</configuration>
 			<goals>
 				<goal>sftp-transfert</goal>
