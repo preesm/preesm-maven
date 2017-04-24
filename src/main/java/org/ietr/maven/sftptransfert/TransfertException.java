@@ -1,14 +1,18 @@
 package org.ietr.maven.sftptransfert;
 
-public class SftpException extends RuntimeException {
+public class TransfertException extends RuntimeException {
 
   /**
    *
    */
   private static final long serialVersionUID = -1231323608285249007L;
 
-  public SftpException(final String message, final Throwable cause) {
+  public TransfertException(final String message, final Throwable cause) {
     super(message, cause);
+  }
+
+  public TransfertException(final String message) {
+    super(message, null);
   }
 
 }
