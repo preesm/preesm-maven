@@ -7,17 +7,17 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
-import java.io.FileNotFoundException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
+
+  protected final JSch jsch = new JSch();
 
   private boolean       connected       = false;
   private Session       session         = null;
@@ -34,53 +34,13 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public final void connectUsingKey(final String host, final int port, final String user, final String keyPath, final boolean strictHostKeyChecking) {
-    connectTo(host, port, user, null, keyPath, null, strictHostKeyChecking);
-  }
-
-  @Override
-  public final void connectUsingKeyWithPassPhrase(final String host, final int port, final String user, final String keyPath, final String passPhrase,
-      final boolean strictHostKeyChecking) {
-    connectTo(host, port, user, null, keyPath, passPhrase, strictHostKeyChecking);
-  }
-
-  @Override
-  public final void connectUsingPassword(final String host, final int port, final String user, final String password, final boolean strictHostKeyChecking) {
-    connectTo(host, port, user, password, null, null, strictHostKeyChecking);
-  }
-
-  protected void connectTo(final String host, final int port, final String user, final String password, final String keyPath, final String keyPassphrase,
-      final boolean strictHostKeyChecking) {
+  public void connect(final SessionInfos infos) {
     if (this.connected) {
       throw new TransfertException("Already connected");
     }
     try {
-      final JSch jsch = new JSch();
 
-      if ((keyPath != null) && (keyPath != "")) {
-        final Path keyFilePath = FileSystems.getDefault().getPath(keyPath);
-        final boolean exists = keyFilePath.toFile().exists();
-        if (!exists) {
-          throw new FileNotFoundException("Key file " + keyPath + "not found in classpath");
-        }
-        if (keyPassphrase == null) {
-          jsch.addIdentity(keyFilePath.toAbsolutePath().toString());
-        } else {
-          jsch.addIdentity(keyPath, keyPassphrase);
-        }
-        this.session = jsch.getSession(user, host, port);
-      } else {
-        this.session = jsch.getSession(user, host, port);
-        this.session.setPassword(password);
-      }
-
-      final Properties config = new Properties();
-      if (!strictHostKeyChecking) {
-        // do not check for key checking
-        config.put("StrictHostKeyChecking", "no");
-      }
-      this.session.setConfig(config);
-      this.session.connect();
+      this.session = infos.openSession(this.jsch);
       this.connected = true;
 
       this.mainSftpChannel = (ChannelSftp) this.session.openChannel("sftp");
@@ -88,7 +48,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
         throw new JSchException("Could not create channel", new NullPointerException());
       }
       this.mainSftpChannel.connect();
-    } catch (final JSchException | FileNotFoundException e) {
+    } catch (final JSchException e) {
       throw new TransfertException("Could not connect: " + e.getMessage(), e);
     }
   }
