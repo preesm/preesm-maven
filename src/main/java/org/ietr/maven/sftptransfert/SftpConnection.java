@@ -149,7 +149,9 @@ public abstract class SftpConnection {
   private void receiveSymlink(final String remotePath, final String localPath) throws IOException {
     final Path localLinkPath = Paths.get(localPath);
     final Path localParentDirPath = localLinkPath.getParent();
-    Files.createDirectories(localParentDirPath);
+    if (localParentDirPath != null) {
+      Files.createDirectories(localParentDirPath);
+    }
 
     final String readSymlink = this.connect.readSymlink(remotePath);
     final Path symLinkPath = Paths.get(readSymlink);
