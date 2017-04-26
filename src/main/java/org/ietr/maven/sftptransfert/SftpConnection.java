@@ -64,6 +64,9 @@ public abstract class SftpConnection {
   }
 
   public final void remove(final String remotePath) throws MojoFailureException {
+    if (remotePath == null) {
+      return;
+    }
     testConnection();
     try {
       this.log.info("removing remote path " + remotePath);
