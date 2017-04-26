@@ -19,9 +19,9 @@ import java.util.Properties;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
-  private boolean     connected       = false;
-  private Session     session         = null;
-  private ChannelSftp mainSftpChannel = null;
+  private boolean       connected       = false;
+  private Session       session         = null;
+  protected ChannelSftp mainSftpChannel = null;
 
   private final Map<String, SftpATTRS>     remotePathToAttributesCache = new HashMap<>();
   private final Map<String, List<LsEntry>> remotePathToLsEntryCache    = new HashMap<>();
