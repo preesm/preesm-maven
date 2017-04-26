@@ -26,7 +26,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   private final Map<String, SftpATTRS>     remotePathToAttributesCache = new HashMap<>();
   private final Map<String, List<LsEntry>> remotePathToLsEntryCache    = new HashMap<>();
 
-  private JschSftpTransfertLayer() {
+  protected JschSftpTransfertLayer() {
   }
 
   public static final JschSftpTransfertLayer build() {
@@ -39,7 +39,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public void connectUsingKeyWithPassPhrase(final String host, final int port, final String user, final String keyPath, final String passPhrase,
+  public final void connectUsingKeyWithPassPhrase(final String host, final int port, final String user, final String keyPath, final String passPhrase,
       final boolean strictHostKeyChecking) {
     connectTo(host, port, user, null, keyPath, passPhrase, strictHostKeyChecking);
   }
@@ -49,7 +49,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     connectTo(host, port, user, password, null, null, strictHostKeyChecking);
   }
 
-  private final void connectTo(final String host, final int port, final String user, final String password, final String keyPath, final String keyPassphrase,
+  protected void connectTo(final String host, final int port, final String user, final String password, final String keyPath, final String keyPassphrase,
       final boolean strictHostKeyChecking) {
     if (this.connected) {
       throw new TransfertException("Already connected");
@@ -94,7 +94,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public final void disconnect() {
+  public void disconnect() {
     this.session.disconnect();
     this.connected = false;
   }
@@ -221,7 +221,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public final void receive(final String remoteFilePath, final String localFilePath) {
+  public void receive(final String remoteFilePath, final String localFilePath) {
     try {
       this.mainSftpChannel.get(remoteFilePath, localFilePath);
     } catch (final SftpException e) {
@@ -230,7 +230,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public final void send(final String localFilePath, final String remoteFilePath) {
+  public void send(final String localFilePath, final String remoteFilePath) {
     try {
       this.mainSftpChannel.put(localFilePath, remoteFilePath);
     } catch (final SftpException e) {
