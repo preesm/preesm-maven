@@ -35,4 +35,8 @@ public interface ISftpTransfertLayer {
 
   public void writeSymlink(final String remotePath, final String linkPath);
 
+  public void remove(final String remotePath);
+
+  public void removeDir(final String remotePath);
+
 }

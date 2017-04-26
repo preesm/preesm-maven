@@ -54,21 +54,56 @@ public abstract class SftpConnection {
     return this.connect.isConnected();
   }
 
+  private final void testExists(final String remotePath) throws MojoFailureException {
+    final boolean exists = this.connect.exists(remotePath);
+    if (!exists) {
+      final String message = MessageFormat.format("Remote path {0} does not exist.", remotePath);
+      this.log.warn(message);
+      throw new MojoFailureException(message);
+    }
+  }
+
+  public final void remove(final String remotePath) throws MojoFailureException {
+    testConnection();
+    try {
+      this.log.info("removing remote path " + remotePath);
+
+      testExists(remotePath);
+
+      if (this.connect.isDirectory(remotePath)) {
+        removeDir(remotePath);
+      } else {
+        this.connect.remove(remotePath);
+      }
+    } catch (final Exception e) {
+      final String message = MessageFormat.format("Could not remove {0} : {1}", remotePath, e.getMessage());
+      this.log.error(message, e);
+    }
+
+  }
+
+  private void removeDir(final String remotePath) throws MojoFailureException {
+    final List<String> ls = this.connect.ls(remotePath);
+    for (final String subPath : ls) {
+      SftpConnection.this.remove(subPath);
+    }
+    this.connect.removeDir(remotePath);
+  }
+
   public final void receive(final String remotePath, final String localPath) throws MojoFailureException {
     testConnection();
     try {
 
       this.log.info("receiving " + remotePath);
 
-      final boolean isDirectory = this.connect.isDirectory(remotePath);
-      final boolean isSymlink = this.connect.isSymlink(remotePath);
+      testExists(remotePath);
 
-      if (isSymlink) {
+      if (this.connect.isSymlink(remotePath)) {
         final String message = MessageFormat.format("Remote path {0} points to a syminl. Using receiveSymlink().", remotePath);
         this.log.debug(message);
         receiveSymlink(remotePath, localPath);
       } else {
-        if (isDirectory) {
+        if (this.connect.isDirectory(remotePath)) {
           final String message = MessageFormat.format("Remote path {0} points to a directory. Using receiveDir().", remotePath);
           this.log.debug(message);
           receiveDir(remotePath, localPath);
@@ -85,20 +120,22 @@ public abstract class SftpConnection {
     }
   }
 
-  private void receiveDir(final String remotePath, final String localPath) throws IOException {
-    final Path localDirPath = FileSystems.getDefault().getPath(localPath);
-    Files.createDirectories(localDirPath);
+  private void receiveDir(final String remotePath, final String localPath) throws IOException, MojoFailureException {
+    try {
+      final Path localDirPath = FileSystems.getDefault().getPath(localPath);
+      Files.createDirectories(localDirPath);
 
-    final List<String> ls = this.connect.ls(remotePath);
-    ls.forEach(s -> {
-      try {
-        final Path path = Paths.get(s);
+      final List<String> ls = this.connect.ls(remotePath);
+      for (final String subPath : ls) {
+        final Path path = Paths.get(subPath);
         final String childFileName = path.getFileName().toString();
-        SftpConnection.this.receive(s, localPath + "/" + childFileName);
-      } catch (final Exception e) {
-        this.log.error(e);
+        SftpConnection.this.receive(subPath, localPath + "/" + childFileName);
       }
-    });
+    } catch (final Exception e) {
+      final String message = MessageFormat.format("Could not receive {0} : {1}", remotePath, e.getMessage());
+      this.log.error(message, e);
+      throw new MojoFailureException(e, message, message);
+    }
   }
 
   private void receiveFile(final String remotePath, final String localPath) throws IOException {

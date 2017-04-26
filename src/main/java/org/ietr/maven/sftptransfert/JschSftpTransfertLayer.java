@@ -89,7 +89,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       }
       this.mainSftpChannel.connect();
     } catch (final JSchException | FileNotFoundException e) {
-      throw new TransfertException("Could not connect", e);
+      throw new TransfertException("Could not connect: " + e.getMessage(), e);
     }
   }
 
@@ -113,7 +113,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
         return false;
       } else {
-        throw new TransfertException("Could not test if file exists", e);
+        throw new TransfertException("Could not test if file exists:" + e.getMessage(), e);
       }
     }
   }
@@ -264,6 +264,24 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
     } catch (final SftpException e) {
       throw new TransfertException("Could not write link", e);
+    }
+  }
+
+  @Override
+  public final void remove(final String remotePath) {
+    try {
+      this.mainSftpChannel.rm(remotePath);
+    } catch (final SftpException e) {
+      throw new TransfertException("Could not remove " + remotePath, e);
+    }
+  }
+
+  @Override
+  public final void removeDir(final String remotePath) {
+    try {
+      this.mainSftpChannel.rmdir(remotePath);
+    } catch (final SftpException e) {
+      throw new TransfertException("Could not remove dir " + remotePath, e);
     }
   }
 
