@@ -41,7 +41,7 @@ public class PrivateKeySessionInfos extends AbstractSessionInfos {
       }
       session = jsch.getSession(this.user, this.host, this.port);
     } catch (JSchException | FileNotFoundException e) {
-      throw new TransfertException("Could not connect", e);
+      throw new TransfertException("Could not connect: " + e.getMessage(), e);
     }
     return session;
   }

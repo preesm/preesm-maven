@@ -60,8 +60,6 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
 
       this.session = this.infos.openSession(JschSftpTransfertLayer.DEFAULT_JSCH);
-      this.connected = true;
-
       this.mainSftpChannel = (ChannelSftp) this.session.openChannel("sftp");
       if (this.mainSftpChannel == null) {
         throw new JSchException("Could not create channel", new NullPointerException());
@@ -70,6 +68,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     } catch (final JSchException e) {
       throw new TransfertException("Could not connect: " + e.getMessage(), e);
     }
+    this.connected = true;
   }
 
   @Override
@@ -96,7 +95,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
         return false;
       } else {
-        throw new TransfertException("Could not test if file exists:" + e.getMessage(), e);
+        throw new TransfertException("Could not test if file " + remotePath + " exists:" + e.getMessage(), e);
       }
     }
   }
@@ -110,7 +109,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       final SftpATTRS lstat = lsAttrsCache(remoteDirPath);
       return lstat.isDir();
     } catch (final SftpException e) {
-      throw new TransfertException("Could not get attributes", e);
+      throw new TransfertException("Could not get attributes of " + remoteDirPath + ": " + e.getMessage(), e);
     }
   }
 
@@ -123,7 +122,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       final SftpATTRS lstat = lsAttrsCache(remotePath);
       return lstat.isLink();
     } catch (final SftpException e) {
-      throw new TransfertException("Could not get attributes", e);
+      throw new TransfertException("Could not get attributes of " + remotePath + ": " + e.getMessage(), e);
     }
   }
 
@@ -155,7 +154,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
         res.add(remoteDirPath + "/" + filename);
       }
     } catch (final SftpException e) {
-      throw new TransfertException("Could not make dir", e);
+      throw new TransfertException("Could not list remote dir " + remoteDirPath + ":" + e.getMessage(), e);
     }
 
     return res;
@@ -188,7 +187,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.mkdir(remoteDirPath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not make dir", e);
+      throw new TransfertException("Could not make remote dir " + remoteDirPath + ": " + e.getMessage(), e);
     }
   }
 
@@ -198,7 +197,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       readlink = this.mainSftpChannel.readlink(remotePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not read link", e);
+      throw new TransfertException("Could not read remote link " + remotePath + ": " + e.getMessage(), e);
     }
     return readlink;
   }
@@ -232,7 +231,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.rm(remotePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not remove " + remotePath, e);
+      throw new TransfertException("Could not remove remote file " + remotePath + ": " + e.getMessage(), e);
     }
   }
 
@@ -241,7 +240,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.rmdir(remotePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not remove dir " + remotePath, e);
+      throw new TransfertException("Could not remove dir " + remotePath + ": " + e.getMessage(), e);
     }
   }
 

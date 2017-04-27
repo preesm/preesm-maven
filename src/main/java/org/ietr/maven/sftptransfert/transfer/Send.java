@@ -15,13 +15,7 @@ public class Send extends Transfer {
     try {
       sftpChannel.put(this.localPath, this.remotePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not send " + this.localPath + ": " + e.getMessage() + e);
+      throw new TransfertException("Could not send " + this.localPath + ": " + e.getMessage(), e);
     }
   }
-
-  @Override
-  public String toString() {
-    return "send:[" + this.localPath + "] -> [" + this.remotePath + "]";
-  }
-
 }

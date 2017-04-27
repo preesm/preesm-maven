@@ -15,13 +15,7 @@ public class Receive extends Transfer {
     try {
       sftpChannel.get(this.remotePath, this.localPath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not receive " + this.remotePath + ": " + e.getMessage() + e);
+      throw new TransfertException("Could not receive " + this.remotePath + ": " + e.getMessage(), e);
     }
   }
-
-  @Override
-  public String toString() {
-    return "receive:[" + this.localPath + "] <- [" + this.remotePath + "]";
-  }
-
 }

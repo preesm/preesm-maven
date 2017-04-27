@@ -21,7 +21,7 @@ public class PasswordSessionInfos extends AbstractSessionInfos {
     try {
       session = jsch.getSession(this.user, this.host, this.port);
     } catch (final JSchException e) {
-      throw new TransfertException("Could not connect", e);
+      throw new TransfertException("Could not connect: " + e.getMessage(), e);
     }
     session.setPassword(this.password);
     return session;

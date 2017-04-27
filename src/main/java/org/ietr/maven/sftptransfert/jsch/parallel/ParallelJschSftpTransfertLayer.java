@@ -1,10 +1,12 @@
 package org.ietr.maven.sftptransfert.jsch.parallel;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import org.ietr.maven.sftptransfert.TransfertException;
 import org.ietr.maven.sftptransfert.jsch.JschSftpTransfertLayer;
 import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
@@ -21,6 +23,18 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
   private CountDownLatch          latch;
   private boolean                 addingTransfers;
 
+  private volatile TransfertException caughtThrowable = null;
+  private final ThreadFactory         threadFactory   = new ThreadFactoryBuilder().setNameFormat("transfer-thread-%d")
+      .setUncaughtExceptionHandler((thread, throwable) -> {
+                                                            if (throwable instanceof TransfertException) {
+                                                              this.caughtThrowable = (TransfertException) throwable;
+                                                            } else {
+                                                              this.caughtThrowable = new TransfertException(thread.toString() + " failed", throwable);
+                                                            }
+                                                            this.latchCountDown();
+                                                          })
+      .build();
+
   public ParallelJschSftpTransfertLayer(final SessionInfos infos) {
     super(infos);
   }
@@ -35,7 +49,7 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
     this.latch = new CountDownLatch(ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE);
     this.transfers = new ArrayBlockingQueue<>(ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE * 10);
     this.addingTransfers = true;
-    final ExecutorService threadPool = Executors.newFixedThreadPool(ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE);
+    final ExecutorService threadPool = Executors.newFixedThreadPool(ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE, this.threadFactory);
     for (int i = 0; i < ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE; i++) {
       threadPool.execute(new TransferExecutor(i, this));
     }
@@ -49,10 +63,13 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
   public void disconnect() {
     this.addingTransfers = false;
     try {
-      this.latch.await();
+      getLatch().await();
     } catch (final InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new TransfertException("Awaiting threads failed: " + e.getMessage(), e);
+    }
+    if (this.caughtThrowable != null) {
+      throw this.caughtThrowable;
     }
     super.disconnect();
   }

@@ -30,7 +30,7 @@ public class WriteSymLink extends Transfer {
       sftpChannel.symlink(linkPath, actualLinkName);
 
     } catch (final SftpException e) {
-      throw new TransfertException("Could not write link", e);
+      throw new TransfertException("Could not write remote link " + this.remotePath + ": " + e.getMessage(), e);
     }
   }
 
@@ -44,14 +44,9 @@ public class WriteSymLink extends Transfer {
       if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
         exists = false;
       } else {
-        throw new TransfertException("Could not test if file exists:" + e.getMessage(), e);
+        throw new TransfertException("Could not test if remote file " + this.remotePath + " exists:" + e.getMessage(), e);
       }
     }
     return exists && lstat.isLink();
-  }
-
-  @Override
-  public String toString() {
-    return "symlink:[" + this.localPath + " -> " + this.remotePath + "]";
   }
 }

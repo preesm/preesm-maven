@@ -34,8 +34,14 @@ public class SftpConnection {
     this.connect.connect();
   }
 
-  public final void disconnect() {
-    this.connect.disconnect();
+  public final void disconnect() throws MojoFailureException {
+    try {
+      this.connect.disconnect();
+    } catch (final Exception e) {
+      final String message = e.getMessage();
+      this.log.error(message, e);
+      throw new MojoFailureException(e, message, message);
+    }
     this.log.debug(MessageFormat.format("Disconnected from {0}", this.connect));
   }
 
