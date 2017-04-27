@@ -60,7 +60,7 @@ public final class SftpTransfertMojo extends AbstractMojo {
     final SessionInfos sessionInfos = resolveSessionInfos();
     final boolean receivingMode = resolveMode();
 
-    final SftpConnection sftpTransfert = new SftpConnection(this.log, sessionInfos, false);
+    final SftpConnection sftpTransfert = new SftpConnection(this.log, sessionInfos, true);
     try {
       if (receivingMode) {
         sftpTransfert.receive(this.remotePath, this.localPath);
