@@ -29,9 +29,9 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
     Files.createFile(Paths.get(subDir.toString() + "/subfile2"));
     Files.createSymbolicLink(Paths.get(subDir.toString() + "/sublink"), Paths.get("subfile2"));
 
-    remoteFolder = "/tmp/tmpDir" + createTempDir.getFileName().toString();
+    this.remoteFolder = "/tmp/tmpDir" + createTempDir.getFileName().toString();
 
-    AbstractTransfertTestSettings.transfer("send", remoteFolder, createTempDir.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.transfer("send", this.remoteFolder, createTempDir.toAbsolutePath().toString());
 
     AbstractTransfertTestSettings.disconnect();
 
@@ -43,7 +43,7 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
   @After
   public void tearDown() throws Exception {
     AbstractTransfertTestSettings.connect();
-    AbstractTransfertTestSettings.sftpTransfert.remove(remoteFolder);
+    AbstractTransfertTestSettings.sftpTransfert.remove(this.remoteFolder);
     AbstractTransfertTestSettings.disconnect();
   }
 
@@ -51,7 +51,7 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
   public void testReceiveLink() throws MojoFailureException, IOException {
     final Path createTempLink = Files.createTempFile("sftpplugin", "link");
     AbstractTransfertTestSettings.connect();
-    AbstractTransfertTestSettings.transfer("receive", remoteFolder + "/sublink", createTempLink.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/sublink", createTempLink.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
     Files.delete(createTempLink);
   }
@@ -60,7 +60,7 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
   public void testReceiveDirLink() throws MojoFailureException, IOException {
     final Path createTempDirLink = Files.createTempFile("sftpplugin", "dirLink");
     AbstractTransfertTestSettings.connect();
-    AbstractTransfertTestSettings.transfer("receive", remoteFolder + "/sublinkDir", createTempDirLink.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/sublinkDir", createTempDirLink.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
     Files.delete(createTempDirLink);
   }
@@ -69,7 +69,7 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
   public void testReceiveFile() throws MojoFailureException, IOException {
     final Path createTempFile = Files.createTempFile("sftpplugin", "file");
     AbstractTransfertTestSettings.connect();
-    AbstractTransfertTestSettings.transfer("receive", remoteFolder + "/subfile1", createTempFile.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/subfile1", createTempFile.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
     Files.delete(createTempFile);
   }
@@ -78,7 +78,7 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
   public void testReceiveEmptyDir() throws MojoFailureException, IOException {
     final Path createTempDir = Files.createTempDirectory("sftpplugin");
     AbstractTransfertTestSettings.connect();
-    AbstractTransfertTestSettings.transfer("receive", remoteFolder + "/subdir2", createTempDir.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/subdir2", createTempDir.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
     Files.delete(createTempDir);
   }
@@ -87,7 +87,7 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
   public void testReceiveFilledDir() throws MojoFailureException, IOException {
     final Path createTempDir = Files.createTempDirectory("sftpplugin");
     AbstractTransfertTestSettings.connect();
-    AbstractTransfertTestSettings.transfer("receive", remoteFolder, createTempDir.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder, createTempDir.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
     FileUtils.deleteDirectory(createTempDir.toFile());
   }

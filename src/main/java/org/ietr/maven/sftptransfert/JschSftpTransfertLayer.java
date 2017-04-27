@@ -13,11 +13,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.ietr.maven.sftptransfert.parallel.ParallelJschSftpTransfertLayer;
 import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
-  protected final JSch jsch = new JSch();
+  private static final JSch DEFAULT_JSCH = new JSch();
+
+  protected final SessionInfos infos;
 
   private boolean       connected       = false;
   private Session       session         = null;
@@ -26,21 +29,34 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   private final Map<String, SftpATTRS>     remotePathToAttributesCache = new HashMap<>();
   private final Map<String, List<LsEntry>> remotePathToLsEntryCache    = new HashMap<>();
 
-  protected JschSftpTransfertLayer() {
+  protected JschSftpTransfertLayer(final SessionInfos infos) {
+    this.infos = infos;
   }
 
-  public static final JschSftpTransfertLayer build() {
-    return new JschSftpTransfertLayer();
+  public static final JSch getDefaultJsch() {
+    return JschSftpTransfertLayer.DEFAULT_JSCH;
+  }
+
+  public static final JschSftpTransfertLayer build(final SessionInfos infos, final boolean parallel) {
+    if (parallel) {
+      return new ParallelJschSftpTransfertLayer(infos);
+    } else {
+      return new JschSftpTransfertLayer(infos);
+    }
+  }
+
+  public final SessionInfos getInfos() {
+    return this.infos;
   }
 
   @Override
-  public void connect(final SessionInfos infos) {
+  public void connect() {
     if (this.connected) {
       throw new TransfertException("Already connected");
     }
     try {
 
-      this.session = infos.openSession(this.jsch);
+      this.session = this.infos.openSession(JschSftpTransfertLayer.DEFAULT_JSCH);
       this.connected = true;
 
       this.mainSftpChannel = (ChannelSftp) this.session.openChannel("sftp");
@@ -55,7 +71,11 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
   @Override
   public void disconnect() {
+    this.mainSftpChannel.exit();
+    this.mainSftpChannel.disconnect();
+    this.mainSftpChannel = null;
     this.session.disconnect();
+    this.session = null;
     this.connected = false;
   }
 

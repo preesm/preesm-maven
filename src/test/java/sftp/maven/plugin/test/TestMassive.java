@@ -7,7 +7,7 @@ public class TestMassive extends AbstractTransfertTestSettings {
 
   @Test
   public void testSendMassive() throws MojoFailureException {
-    AbstractTransfertTestSettings.connect();
+    AbstractTransfertTestSettings.connect(true);
 
     AbstractTransfertTestSettings.transfer("send", "/root/testsend/", "/home/koubi/test/complete/");
 

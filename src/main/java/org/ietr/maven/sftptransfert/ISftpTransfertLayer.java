@@ -1,10 +1,9 @@
 package org.ietr.maven.sftptransfert;
 
 import java.util.List;
-import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
 
 public interface ISftpTransfertLayer {
-  public void connect(final SessionInfos infos);
+  public void connect();
 
   public void disconnect();
 

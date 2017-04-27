@@ -19,4 +19,9 @@ public class Send extends Transfer {
     }
   }
 
+  @Override
+  public String toString() {
+    return "send:[" + this.localPath + "] -> [" + this.remotePath + "]";
+  }
+
 }

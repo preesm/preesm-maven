@@ -22,6 +22,7 @@ public abstract class AbstractSessionInfos implements SessionInfos {
 
   protected abstract Session initSession(JSch jsch);
 
+  @Override
   public Session openSession(final JSch jsch) {
 
     final Session session = initSession(jsch);

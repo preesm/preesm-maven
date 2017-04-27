@@ -24,8 +24,12 @@ public class AbstractTransfertTestSettings {
 
   static SftpConnection sftpTransfert;
 
-  static final void connect() {
-    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(AbstractTransfertTestSettings.log, infos);
+  public static void connect() {
+    AbstractTransfertTestSettings.connect(false);
+  }
+
+  static final void connect(final boolean parallel) {
+    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(AbstractTransfertTestSettings.log, AbstractTransfertTestSettings.infos, parallel);
   }
 
   static final void disconnect() {

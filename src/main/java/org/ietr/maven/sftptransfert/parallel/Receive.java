@@ -19,4 +19,9 @@ public class Receive extends Transfer {
     }
   }
 
+  @Override
+  public String toString() {
+    return "receive:[" + this.localPath + "] <- [" + this.remotePath + "]";
+  }
+
 }
