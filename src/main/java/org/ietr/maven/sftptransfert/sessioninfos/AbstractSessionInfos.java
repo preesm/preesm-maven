@@ -34,7 +34,7 @@ public abstract class AbstractSessionInfos implements SessionInfos {
     try {
       session.connect();
     } catch (final JSchException e) {
-      throw new TransfertException("Could not connect", e);
+      throw new TransfertException("Could not connect: " + e.getMessage(), e);
     }
 
     return session;
