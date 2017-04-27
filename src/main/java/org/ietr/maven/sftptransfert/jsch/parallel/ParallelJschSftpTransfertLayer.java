@@ -11,6 +11,7 @@ import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
 import org.ietr.maven.sftptransfert.transfer.Receive;
 import org.ietr.maven.sftptransfert.transfer.Send;
 import org.ietr.maven.sftptransfert.transfer.Transfer;
+import org.ietr.maven.sftptransfert.transfer.WriteSymLink;
 
 public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
 
@@ -63,6 +64,16 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
     } catch (final InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new TransfertException("Receive failed : " + e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public void writeSymlink(final String remotePath, final String linkPath) {
+    try {
+      this.transfers.put(new WriteSymLink(linkPath, remotePath));
+    } catch (final InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new TransfertException("Write symlink failed : " + e.getMessage(), e);
     }
   }
 

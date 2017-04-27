@@ -37,7 +37,7 @@ public class PrivateKeySessionInfos extends AbstractSessionInfos {
       if (this.keyPassPhrase == null) {
         jsch.addIdentity(keyFilePath.toAbsolutePath().toString());
       } else {
-        jsch.addIdentity(this.keyPath, this.keyPassPhrase);
+        jsch.addIdentity(keyFilePath.toAbsolutePath().toString(), this.keyPassPhrase);
       }
       session = jsch.getSession(this.user, this.host, this.port);
     } catch (JSchException | FileNotFoundException e) {

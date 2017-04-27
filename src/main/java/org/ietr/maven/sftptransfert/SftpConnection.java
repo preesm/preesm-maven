@@ -24,7 +24,7 @@ public class SftpConnection {
   private int                       dirLevel   = 0;
   private int                       fastCheckDirLevel;
 
-  protected SftpConnection(final SessionInfos infos, final boolean parallel) {
+  public SftpConnection(final SessionInfos infos, final boolean parallel) {
     this(new SystemStreamLog(), infos, parallel);
   }
 
