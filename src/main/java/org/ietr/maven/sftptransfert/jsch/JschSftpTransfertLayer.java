@@ -17,6 +17,8 @@ import org.ietr.maven.sftptransfert.ISftpTransfertLayer;
 import org.ietr.maven.sftptransfert.TransfertException;
 import org.ietr.maven.sftptransfert.jsch.parallel.ParallelJschSftpTransfertLayer;
 import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
+import org.ietr.maven.sftptransfert.transfer.Receive;
+import org.ietr.maven.sftptransfert.transfer.Send;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
@@ -204,20 +206,12 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
   @Override
   public void receive(final String remoteFilePath, final String localFilePath) {
-    try {
-      this.mainSftpChannel.get(remoteFilePath, localFilePath);
-    } catch (final SftpException e) {
-      throw new TransfertException("Receive failed : " + e.getMessage(), e);
-    }
+    new Receive(localFilePath, remoteFilePath).process(this.mainSftpChannel);
   }
 
   @Override
   public void send(final String localFilePath, final String remoteFilePath) {
-    try {
-      this.mainSftpChannel.put(localFilePath, remoteFilePath);
-    } catch (final SftpException e) {
-      throw new TransfertException("Send failed [" + localFilePath + " to " + remoteFilePath + "] : " + e.getMessage(), e);
-    }
+    new Send(localFilePath, remoteFilePath).process(this.mainSftpChannel);
   }
 
   @Override
