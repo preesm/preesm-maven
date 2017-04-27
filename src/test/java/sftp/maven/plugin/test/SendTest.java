@@ -115,7 +115,7 @@ public class SendTest extends AbstractTransfertTestSettings {
     Files.createSymbolicLink(createTempLink, Paths.get("/"));
     this.remotePath = "/tmp/tmpLink" + createTempLink.getFileName().toString();
 
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect(20);
     AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempLink.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
 
@@ -130,7 +130,7 @@ public class SendTest extends AbstractTransfertTestSettings {
 
     System.out.println("#####");
     System.out.println("#####");
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect(20);
     AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempFile.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
     System.out.println("#####");
@@ -143,7 +143,7 @@ public class SendTest extends AbstractTransfertTestSettings {
     final Path createTempDir = Files.createTempDirectory("sftpplugin");
     this.remotePath = "/tmp/tmpDir" + createTempDir.getFileName().toString();
 
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect(20);
     AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempDir.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
 
@@ -164,7 +164,7 @@ public class SendTest extends AbstractTransfertTestSettings {
 
     this.remotePath = "/tmp/tmpDir" + createTempDir.getFileName().toString();
 
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect(20);
     AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempDir.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
 

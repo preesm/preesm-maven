@@ -24,13 +24,13 @@ public class SftpConnection {
   private int                       dirLevel   = 0;
   private int                       fastCheckDirLevel;
 
-  public SftpConnection(final SessionInfos infos, final boolean parallel) {
-    this(new SystemStreamLog(), infos, parallel);
+  public SftpConnection(final SessionInfos infos, final int transferThreadCount) {
+    this(new SystemStreamLog(), infos, transferThreadCount);
   }
 
-  public SftpConnection(final Log log, final SessionInfos infos, final boolean parallel) {
+  public SftpConnection(final Log log, final SessionInfos infos, final int transferThreadCount) {
     this.log = log;
-    this.connect = JschSftpTransfertLayer.build(infos, parallel);
+    this.connect = JschSftpTransfertLayer.build(infos, transferThreadCount);
     this.connect.connect();
   }
 

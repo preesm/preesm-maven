@@ -37,6 +37,9 @@ public final class SftpTransfertMojo extends AbstractMojo {
   @Parameter(defaultValue = "true", property = "strictHostKeyChecking", required = true)
   public boolean strictHostKeyChecking;
 
+  @Parameter(defaultValue = "8", property = "transferThreadCount", required = true)
+  public int transferThreadCount;
+
   @Parameter(property = "localPath", required = true)
   public String localPath;
   @Parameter(property = "remotePath", required = true)
@@ -60,7 +63,7 @@ public final class SftpTransfertMojo extends AbstractMojo {
     final SessionInfos sessionInfos = resolveSessionInfos();
     final boolean receivingMode = resolveMode();
 
-    final SftpConnection sftpTransfert = new SftpConnection(this.log, sessionInfos, true);
+    final SftpConnection sftpTransfert = new SftpConnection(this.log, sessionInfos, transferThreadCount);
     try {
       if (receivingMode) {
         sftpTransfert.receive(this.remotePath, this.localPath);

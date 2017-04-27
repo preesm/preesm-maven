@@ -17,7 +17,7 @@ public class FailTest extends AbstractTransfertTestSettings {
 
   @Test
   public void testAlreadyConnected() throws MojoFailureException {
-    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, false);
+    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 1);
     build.connect();
     try {
       build.connect();
@@ -31,7 +31,7 @@ public class FailTest extends AbstractTransfertTestSettings {
 
   @Test
   public void testAlreadyConnectedParallel() throws MojoFailureException {
-    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, true);
+    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 20);
     build.connect();
     try {
       build.connect();
@@ -76,7 +76,7 @@ public class FailTest extends AbstractTransfertTestSettings {
   @Test
   public void testReceiveFailParallel() throws IOException, MojoFailureException {
     final Path createTempFile = Files.createTempFile("sftpplugin", "file");
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect(20);
     try {
       AbstractTransfertTestSettings.transfer("receive", "/nonexistingdir/nonexistingfile", "/tmp/unused");
       Assert.fail();
@@ -91,7 +91,7 @@ public class FailTest extends AbstractTransfertTestSettings {
   @Test
   public void testSendFailParallel() throws IOException, MojoFailureException {
     final Path createTempFile = Files.createTempFile("sftpplugin", "file");
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect(20);
     try {
       AbstractTransfertTestSettings.transfer("send", "/tmp/unused", "/nonexistingdir/nonexistingfile");
       AbstractTransfertTestSettings.disconnect();
@@ -115,7 +115,7 @@ public class FailTest extends AbstractTransfertTestSettings {
     final PrivateKeySessionInfos t = new PrivateKeySessionInfos(Settings.sftpHost, Settings.sftpPort, Settings.sftpUser, Settings.strictHostKeyChecking,
         "/tmp/notExisting");
     try {
-      new SftpConnection(t, false);
+      new SftpConnection(t, 1);
       Assert.fail();
     } catch (final TransfertException e) {
       Assert.assertTrue(e.getCause() instanceof FileNotFoundException);
@@ -128,7 +128,7 @@ public class FailTest extends AbstractTransfertTestSettings {
     final PrivateKeySessionInfos t = new PrivateKeySessionInfos(Settings.sftpHost, Settings.sftpPort, Settings.sftpUser, Settings.strictHostKeyChecking,
         createTempFile.toAbsolutePath().toString(), "alsowrongpassphrase");
     try {
-      new SftpConnection(t, false);
+      new SftpConnection(t, 1);
       Assert.fail();
     } catch (final TransfertException e) {
       Assert.assertTrue(e.getCause() instanceof JSchException);

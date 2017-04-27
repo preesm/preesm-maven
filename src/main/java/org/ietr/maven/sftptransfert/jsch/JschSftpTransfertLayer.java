@@ -40,9 +40,9 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     return JschSftpTransfertLayer.DEFAULT_JSCH;
   }
 
-  public static final JschSftpTransfertLayer build(final SessionInfos infos, final boolean parallel) {
-    if (parallel) {
-      return new ParallelJschSftpTransfertLayer(infos);
+  public static final JschSftpTransfertLayer build(final SessionInfos infos, final int transferThreadCount) {
+    if (transferThreadCount > 1) {
+      return new ParallelJschSftpTransfertLayer(infos, transferThreadCount);
     } else {
       return new JschSftpTransfertLayer(infos);
     }

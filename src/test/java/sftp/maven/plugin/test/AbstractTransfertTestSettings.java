@@ -18,11 +18,11 @@ public class AbstractTransfertTestSettings implements Settings {
   static SftpConnection sftpTransfert;
 
   public static void connect() {
-    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(AbstractTransfertTestSettings.passwdInfos, false);
+    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(AbstractTransfertTestSettings.passwdInfos, 1);
   }
 
-  static final void connect(final boolean parallel) {
-    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(Settings.log, AbstractTransfertTestSettings.keyInfos, parallel);
+  static final void connect(final int transferThreadCount) {
+    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(Settings.log, AbstractTransfertTestSettings.keyInfos, 4);
   }
 
   static final void disconnect() throws MojoFailureException {

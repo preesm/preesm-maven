@@ -59,7 +59,7 @@ public class RemoveTest extends AbstractTransfertTestSettings {
   @Test
   public void testRemoveLinkParallel() throws MojoFailureException, IOException {
     final Path createTempLink = Files.createTempFile("sftpplugin", "link");
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect(20);
     AbstractTransfertTestSettings.sftpTransfert.remove(this.remoteFolder + "/sublink");
     AbstractTransfertTestSettings.disconnect();
     Files.delete(createTempLink);

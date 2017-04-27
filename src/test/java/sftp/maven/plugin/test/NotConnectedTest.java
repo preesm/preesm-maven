@@ -10,7 +10,7 @@ public class NotConnectedTest extends AbstractTransfertTestSettings {
 
   @Test
   public void testNotConnectedSendLink() {
-    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, false);
+    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 1);
     build.connect();
     final ChannelSftp mainSftpChannel = build.getMainSftpChannel();
     mainSftpChannel.exit();
@@ -26,7 +26,7 @@ public class NotConnectedTest extends AbstractTransfertTestSettings {
 
   @Test
   public void testNotConnectedReceiveFile() {
-    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, false);
+    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 1);
     build.connect();
     final ChannelSftp mainSftpChannel = build.getMainSftpChannel();
     mainSftpChannel.exit();
@@ -42,7 +42,7 @@ public class NotConnectedTest extends AbstractTransfertTestSettings {
 
   @Test
   public void testNotConnectedSendFile() {
-    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, false);
+    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 1);
     build.connect();
     final ChannelSftp mainSftpChannel = build.getMainSftpChannel();
     mainSftpChannel.exit();

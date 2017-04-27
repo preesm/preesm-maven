@@ -35,7 +35,7 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
                                                           })
       .build();
 
-  public ParallelJschSftpTransfertLayer(final SessionInfos infos) {
+  public ParallelJschSftpTransfertLayer(final SessionInfos infos, final int transferThreadCount) {
     super(infos);
   }
 
