@@ -17,6 +17,8 @@ Default configuration looks as follows:
 				<serverHost>server.host.or.ip</serverHost>
 				<!-- true by default -->
 				<strictHostKeyChecking>false</strictHostKeyChecking>
+				<!-- 8 by default -->
+				<transferThreadCount>2</transferThreadCount>
 				<!-- send or receive, receive by default -->
 				<mode>receive</mode>
 				<remotePath>/absolute/path/on/remote/host</remotePath>
@@ -33,6 +35,7 @@ Default configuration looks as follows:
 				<serverId>server.id</serverId>
 				<serverHost>server.host.or.ip</serverHost>
 				<strictHostKeyChecking>false</strictHostKeyChecking>
+				<transferThreadCount>16</transferThreadCount>
 				<mode>send</mode>
 				<remotePath>/home/projects/myprojects/htdcs/p2repo/</remotePath>
 				<localPath>${project.basedir}/target/repository/</localPath>
