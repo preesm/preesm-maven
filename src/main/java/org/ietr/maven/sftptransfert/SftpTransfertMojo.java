@@ -12,6 +12,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.PasswordSessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.PrivateKeySessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.SessionInfos;
 
 @Mojo(name = "sftp-transfert", defaultPhase = LifecyclePhase.NONE)
 public final class SftpTransfertMojo extends AbstractMojo {
@@ -48,46 +51,16 @@ public final class SftpTransfertMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.directory}", readonly = true)
   public File target;
 
+  private Log log;
+
   @Override
   public final void execute() throws MojoExecutionException, MojoFailureException {
-    final Log log = getLog();
+    this.log = getLog();
 
-    final Server server = this.settings.getServer(this.serverId);
-    if (server == null) {
-      final String message = MessageFormat
-          .format("Error: Could not find server with id \"{0}\". Make sure you have a <servers>...</servers> section with proper <server> "
-              + "configuration in your maven settings. See https://maven.apache.org/settings.html#Servers.", this.serverId);
-      log.error(message);
-      throw new MojoFailureException(message);
-    }
+    final SessionInfos sessionInfos = resolveSessionInfos();
+    final boolean receivingMode = resolveMode();
 
-    final String sftpHost = this.serverHost;
-    final int sftpPort = this.serverPort;
-    final String sftpUser = server.getUsername();
-    final String sftpPassword = server.getPassword();
-    final String sftpPrivateKey = server.getPrivateKey();
-    final String sftpPrivateKeyPassphrase = server.getPassphrase();
-
-    final boolean receivingMode;
-
-    if ("receive".equals(this.mode)) {
-      receivingMode = true;
-    } else {
-      if ("send".equals(this.mode)) {
-        receivingMode = false;
-      } else {
-        final String message = MessageFormat.format("Unsupported mode {0}. Supported modes are receive (default) and send.", this.mode);
-        log.error(message);
-        throw new MojoFailureException(message);
-      }
-    }
-
-    final SftpConnection sftpTransfert;
-    if (sftpPassword != null) {
-      sftpTransfert = new PasswordSftpConnection(log, sftpUser, sftpHost, sftpPort, sftpPassword, this.strictHostKeyChecking);
-    } else {
-      sftpTransfert = new PrivateKeySftpConnection(log, sftpUser, sftpHost, sftpPort, sftpPrivateKey, sftpPrivateKeyPassphrase, this.strictHostKeyChecking);
-    }
+    final SftpConnection sftpTransfert = new SftpConnection(this.log, sessionInfos, false);
     try {
       if (receivingMode) {
         sftpTransfert.receive(this.remotePath, this.localPath);
@@ -97,5 +70,48 @@ public final class SftpTransfertMojo extends AbstractMojo {
     } finally {
       sftpTransfert.disconnect();
     }
+  }
+
+  private SessionInfos resolveSessionInfos() throws MojoFailureException {
+    final String sftpHost = this.serverHost;
+    final int sftpPort = this.serverPort;
+
+    final Server server = this.settings.getServer(this.serverId);
+    if (server == null) {
+      final String message = MessageFormat
+          .format("Error: Could not find server with id \"{0}\". Make sure you have a <servers>...</servers> section with proper <server> "
+              + "configuration in your maven settings. See https://maven.apache.org/settings.html#Servers.", this.serverId);
+      this.log.error(message);
+      throw new MojoFailureException(message);
+    }
+
+    final String sftpUser = server.getUsername();
+    final String sftpPassword = server.getPassword();
+    final String sftpPrivateKey = server.getPrivateKey();
+    final String sftpPrivateKeyPassphrase = server.getPassphrase();
+
+    final SessionInfos sessionInfos;
+    if (sftpPassword != null) {
+      sessionInfos = new PasswordSessionInfos(sftpHost, sftpPort, sftpUser, this.strictHostKeyChecking, sftpPassword);
+    } else {
+      sessionInfos = new PrivateKeySessionInfos(sftpHost, sftpPort, sftpUser, this.strictHostKeyChecking, sftpPrivateKey, sftpPrivateKeyPassphrase);
+    }
+    return sessionInfos;
+  }
+
+  private boolean resolveMode() throws MojoFailureException {
+    boolean receivingMode;
+    if ("receive".equals(this.mode)) {
+      receivingMode = true;
+    } else {
+      if ("send".equals(this.mode)) {
+        receivingMode = false;
+      } else {
+        final String message = MessageFormat.format("Unsupported mode {0}. Supported modes are receive (default) and send.", this.mode);
+        this.log.error(message);
+        throw new MojoFailureException(message);
+      }
+    }
+    return receivingMode;
   }
 }

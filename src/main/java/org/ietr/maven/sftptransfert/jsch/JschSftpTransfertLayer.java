@@ -1,4 +1,4 @@
-package org.ietr.maven.sftptransfert;
+package org.ietr.maven.sftptransfert.jsch;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -7,17 +7,23 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
-import java.io.FileNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import org.ietr.maven.sftptransfert.ISftpTransfertLayer;
+import org.ietr.maven.sftptransfert.TransfertException;
+import org.ietr.maven.sftptransfert.jsch.parallel.ParallelJschSftpTransfertLayer;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.SessionInfos;
+import org.ietr.maven.sftptransfert.jsch.transfer.Receive;
+import org.ietr.maven.sftptransfert.jsch.transfer.Send;
+import org.ietr.maven.sftptransfert.jsch.transfer.WriteSymLink;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
+
+  private static final JSch DEFAULT_JSCH = new JSch();
+
+  protected final SessionInfos infos;
 
   private boolean       connected       = false;
   private Session       session         = null;
@@ -26,76 +32,56 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   private final Map<String, SftpATTRS>     remotePathToAttributesCache = new HashMap<>();
   private final Map<String, List<LsEntry>> remotePathToLsEntryCache    = new HashMap<>();
 
-  protected JschSftpTransfertLayer() {
+  protected JschSftpTransfertLayer(final SessionInfos infos) {
+    this.infos = infos;
   }
 
-  public static final JschSftpTransfertLayer build() {
-    return new JschSftpTransfertLayer();
+  public static final JSch getDefaultJsch() {
+    return JschSftpTransfertLayer.DEFAULT_JSCH;
+  }
+
+  public static final JschSftpTransfertLayer build(final SessionInfos infos, final boolean parallel) {
+    if (parallel) {
+      return new ParallelJschSftpTransfertLayer(infos);
+    } else {
+      return new JschSftpTransfertLayer(infos);
+    }
+  }
+
+  public final ChannelSftp getMainSftpChannel() {
+    return this.mainSftpChannel;
+  }
+
+  public final SessionInfos getInfos() {
+    return this.infos;
   }
 
   @Override
-  public final void connectUsingKey(final String host, final int port, final String user, final String keyPath, final boolean strictHostKeyChecking) {
-    connectTo(host, port, user, null, keyPath, null, strictHostKeyChecking);
-  }
-
-  @Override
-  public final void connectUsingKeyWithPassPhrase(final String host, final int port, final String user, final String keyPath, final String passPhrase,
-      final boolean strictHostKeyChecking) {
-    connectTo(host, port, user, null, keyPath, passPhrase, strictHostKeyChecking);
-  }
-
-  @Override
-  public final void connectUsingPassword(final String host, final int port, final String user, final String password, final boolean strictHostKeyChecking) {
-    connectTo(host, port, user, password, null, null, strictHostKeyChecking);
-  }
-
-  protected void connectTo(final String host, final int port, final String user, final String password, final String keyPath, final String keyPassphrase,
-      final boolean strictHostKeyChecking) {
+  public void connect() {
     if (this.connected) {
       throw new TransfertException("Already connected");
     }
     try {
-      final JSch jsch = new JSch();
 
-      if ((keyPath != null) && (keyPath != "")) {
-        final Path keyFilePath = FileSystems.getDefault().getPath(keyPath);
-        final boolean exists = keyFilePath.toFile().exists();
-        if (!exists) {
-          throw new FileNotFoundException("Key file " + keyPath + "not found in classpath");
-        }
-        if (keyPassphrase == null) {
-          jsch.addIdentity(keyFilePath.toAbsolutePath().toString());
-        } else {
-          jsch.addIdentity(keyPath, keyPassphrase);
-        }
-        this.session = jsch.getSession(user, host, port);
-      } else {
-        this.session = jsch.getSession(user, host, port);
-        this.session.setPassword(password);
-      }
-
-      final Properties config = new Properties();
-      if (!strictHostKeyChecking) {
-        // do not check for key checking
-        config.put("StrictHostKeyChecking", "no");
-      }
-      this.session.setConfig(config);
-      this.session.connect();
-      this.connected = true;
-
+      this.session = this.infos.openSession(JschSftpTransfertLayer.DEFAULT_JSCH);
       this.mainSftpChannel = (ChannelSftp) this.session.openChannel("sftp");
       if (this.mainSftpChannel == null) {
         throw new JSchException("Could not create channel", new NullPointerException());
       }
       this.mainSftpChannel.connect();
-    } catch (final JSchException | FileNotFoundException e) {
+    } catch (final JSchException e) {
       throw new TransfertException("Could not connect: " + e.getMessage(), e);
     }
+    this.connected = true;
   }
 
   @Override
   public void disconnect() {
+    this.mainSftpChannel.exit();
+    this.mainSftpChannel.disconnect();
+    this.mainSftpChannel = null;
     this.session.disconnect();
+    this.session = null;
     this.connected = false;
   }
 
@@ -113,7 +99,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
         return false;
       } else {
-        throw new TransfertException("Could not test if file exists:" + e.getMessage(), e);
+        throw new TransfertException("Could not test if file " + remotePath + " exists:" + e.getMessage(), e);
       }
     }
   }
@@ -127,7 +113,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       final SftpATTRS lstat = lsAttrsCache(remoteDirPath);
       return lstat.isDir();
     } catch (final SftpException e) {
-      throw new TransfertException("Could not get attributes", e);
+      throw new TransfertException("Could not get attributes of " + remoteDirPath + ": " + e.getMessage(), e);
     }
   }
 
@@ -140,7 +126,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
       final SftpATTRS lstat = lsAttrsCache(remotePath);
       return lstat.isLink();
     } catch (final SftpException e) {
-      throw new TransfertException("Could not get attributes", e);
+      throw new TransfertException("Could not get attributes of " + remotePath + ": " + e.getMessage(), e);
     }
   }
 
@@ -172,7 +158,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
         res.add(remoteDirPath + "/" + filename);
       }
     } catch (final SftpException e) {
-      throw new TransfertException("Could not make dir", e);
+      throw new TransfertException("Could not list remote dir " + remoteDirPath + ":" + e.getMessage(), e);
     }
 
     return res;
@@ -205,7 +191,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.mkdir(remoteDirPath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not make dir", e);
+      throw new TransfertException("Could not make remote dir " + remoteDirPath + ": " + e.getMessage(), e);
     }
   }
 
@@ -215,27 +201,19 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       readlink = this.mainSftpChannel.readlink(remotePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not read link", e);
+      throw new TransfertException("Could not read remote link " + remotePath + ": " + e.getMessage(), e);
     }
     return readlink;
   }
 
   @Override
   public void receive(final String remoteFilePath, final String localFilePath) {
-    try {
-      this.mainSftpChannel.get(remoteFilePath, localFilePath);
-    } catch (final SftpException e) {
-      throw new TransfertException("Receive failed : " + e.getMessage(), e);
-    }
+    new Receive(localFilePath, remoteFilePath).process(this.mainSftpChannel);
   }
 
   @Override
   public void send(final String localFilePath, final String remoteFilePath) {
-    try {
-      this.mainSftpChannel.put(localFilePath, remoteFilePath);
-    } catch (final SftpException e) {
-      throw new TransfertException("Send failed [" + localFilePath + " to " + remoteFilePath + "] : " + e.getMessage(), e);
-    }
+    new Send(localFilePath, remoteFilePath).process(this.mainSftpChannel);
   }
 
   @Override
@@ -248,23 +226,8 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public final void writeSymlink(final String remotePath, final String linkPath) {
-    try {
-      final Path path = Paths.get(remotePath);
-      final Path parent = path.getParent();
-      final String linkParentDirPath = parent.toString();
-      // Jsch implementation actually requires to CD first.
-      this.mainSftpChannel.cd(linkParentDirPath);
-      final String actualLinkName = path.getFileName().toString();
-
-      if (isSymlink(remotePath)) {
-        this.mainSftpChannel.rm(actualLinkName);
-      }
-      this.mainSftpChannel.symlink(linkPath, actualLinkName);
-
-    } catch (final SftpException e) {
-      throw new TransfertException("Could not write link", e);
-    }
+  public void writeSymlink(final String remotePath, final String linkPath) {
+    new WriteSymLink(linkPath, remotePath).process(this.mainSftpChannel);
   }
 
   @Override
@@ -272,7 +235,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.rm(remotePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not remove " + remotePath, e);
+      throw new TransfertException("Could not remove remote file " + remotePath + ": " + e.getMessage(), e);
     }
   }
 
@@ -281,7 +244,7 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     try {
       this.mainSftpChannel.rmdir(remotePath);
     } catch (final SftpException e) {
-      throw new TransfertException("Could not remove dir " + remotePath, e);
+      throw new TransfertException("Could not remove dir " + remotePath + ": " + e.getMessage(), e);
     }
   }
 

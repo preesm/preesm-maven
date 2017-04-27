@@ -3,12 +3,7 @@ package org.ietr.maven.sftptransfert;
 import java.util.List;
 
 public interface ISftpTransfertLayer {
-  public void connectUsingPassword(final String host, final int port, final String user, final String password, final boolean strictHostKeyChecking);
-
-  public void connectUsingKey(final String host, final int port, final String user, final String keyPath, final boolean strictHostKeyChecking);
-
-  public void connectUsingKeyWithPassPhrase(final String host, final int port, final String user, final String keyPath, final String passPhrase,
-      final boolean strictHostKeyChecking);
+  public void connect();
 
   public void disconnect();
 

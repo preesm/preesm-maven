@@ -1,0 +1,138 @@
+package sftp.maven.plugin.test;
+
+import com.jcraft.jsch.JSchException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.apache.maven.plugin.MojoFailureException;
+import org.ietr.maven.sftptransfert.SftpConnection;
+import org.ietr.maven.sftptransfert.TransfertException;
+import org.ietr.maven.sftptransfert.jsch.JschSftpTransfertLayer;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.PrivateKeySessionInfos;
+import org.junit.Assert;
+import org.junit.Test;
+
+public class FailTest extends AbstractTransfertTestSettings {
+
+  @Test
+  public void testAlreadyConnected() throws MojoFailureException {
+    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, false);
+    build.connect();
+    try {
+      build.connect();
+      Assert.fail();
+    } catch (final TransfertException e) {
+      // success
+    } finally {
+      build.disconnect();
+    }
+  }
+
+  @Test
+  public void testAlreadyConnectedParallel() throws MojoFailureException {
+    final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, true);
+    build.connect();
+    try {
+      build.connect();
+      Assert.fail();
+    } catch (final TransfertException e) {
+      // success
+    } finally {
+      build.disconnect();
+    }
+  }
+
+  @Test
+  public void testReceiveFail() throws IOException, MojoFailureException {
+    final Path createTempFile = Files.createTempFile("sftpplugin", "file");
+    AbstractTransfertTestSettings.connect();
+    try {
+      AbstractTransfertTestSettings.transfer("receive", "/nonexistingdir/nonexistingfile", "/tmp/unused");
+      Assert.fail();
+    } catch (final MojoFailureException e) {
+      // success
+    } finally {
+      AbstractTransfertTestSettings.disconnect();
+      Files.delete(createTempFile);
+    }
+  }
+
+  @Test
+  public void testSendFail() throws IOException, MojoFailureException {
+    final Path createTempFile = Files.createTempFile("sftpplugin", "file");
+    AbstractTransfertTestSettings.connect();
+    try {
+      AbstractTransfertTestSettings.transfer("send", "/tmp/unused", "/nonexistingdir/nonexistingfile");
+      Assert.fail();
+    } catch (final MojoFailureException e) {
+      // success
+    } finally {
+      AbstractTransfertTestSettings.disconnect();
+      Files.delete(createTempFile);
+    }
+  }
+
+  @Test
+  public void testReceiveFailParallel() throws IOException, MojoFailureException {
+    final Path createTempFile = Files.createTempFile("sftpplugin", "file");
+    AbstractTransfertTestSettings.connect(true);
+    try {
+      AbstractTransfertTestSettings.transfer("receive", "/nonexistingdir/nonexistingfile", "/tmp/unused");
+      Assert.fail();
+    } catch (final MojoFailureException e) {
+      // success
+    } finally {
+      AbstractTransfertTestSettings.disconnect();
+      Files.delete(createTempFile);
+    }
+  }
+
+  @Test
+  public void testSendFailParallel() throws IOException, MojoFailureException {
+    final Path createTempFile = Files.createTempFile("sftpplugin", "file");
+    AbstractTransfertTestSettings.connect(true);
+    try {
+      AbstractTransfertTestSettings.transfer("send", "/tmp/unused", "/nonexistingdir/nonexistingfile");
+      AbstractTransfertTestSettings.disconnect();
+      Assert.fail();
+    } catch (final MojoFailureException e) {
+      // success
+    } finally {
+      Files.delete(createTempFile);
+    }
+  }
+
+  @Test
+  public void testRemoveFail() throws MojoFailureException, IOException {
+    AbstractTransfertTestSettings.connect();
+    AbstractTransfertTestSettings.sftpTransfert.remove("/nonexistingdir/nonexistingfile");
+    AbstractTransfertTestSettings.disconnect();
+  }
+
+  @Test
+  public void testNotKeyFile() {
+    final PrivateKeySessionInfos t = new PrivateKeySessionInfos(Settings.sftpHost, Settings.sftpPort, Settings.sftpUser, Settings.strictHostKeyChecking,
+        "/tmp/notExisting");
+    try {
+      new SftpConnection(t, false);
+      Assert.fail();
+    } catch (final TransfertException e) {
+      Assert.assertTrue(e.getCause() instanceof FileNotFoundException);
+    }
+  }
+
+  @Test
+  public void testWrongPassPhrase() throws IOException {
+    final Path createTempFile = Files.createTempFile("sftpplugin", ".rsa");
+    final PrivateKeySessionInfos t = new PrivateKeySessionInfos(Settings.sftpHost, Settings.sftpPort, Settings.sftpUser, Settings.strictHostKeyChecking,
+        createTempFile.toAbsolutePath().toString(), "alsowrongpassphrase");
+    try {
+      new SftpConnection(t, false);
+      Assert.fail();
+    } catch (final TransfertException e) {
+      Assert.assertTrue(e.getCause() instanceof JSchException);
+    }
+    Files.delete(createTempFile);
+  }
+}
