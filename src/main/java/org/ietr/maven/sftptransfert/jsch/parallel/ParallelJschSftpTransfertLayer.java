@@ -9,11 +9,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import org.ietr.maven.sftptransfert.TransfertException;
 import org.ietr.maven.sftptransfert.jsch.JschSftpTransfertLayer;
-import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
-import org.ietr.maven.sftptransfert.transfer.Receive;
-import org.ietr.maven.sftptransfert.transfer.Send;
-import org.ietr.maven.sftptransfert.transfer.Transfer;
-import org.ietr.maven.sftptransfert.transfer.WriteSymLink;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.SessionInfos;
+import org.ietr.maven.sftptransfert.jsch.transfer.Receive;
+import org.ietr.maven.sftptransfert.jsch.transfer.Send;
+import org.ietr.maven.sftptransfert.jsch.transfer.Transfer;
+import org.ietr.maven.sftptransfert.jsch.transfer.WriteSymLink;
 
 public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
 
@@ -31,7 +31,7 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
                                                             } else {
                                                               this.caughtThrowable = new TransfertException(thread.toString() + " failed", throwable);
                                                             }
-                                                            this.latchCountDown();
+                                                            latchCountDown();
                                                           })
       .build();
 

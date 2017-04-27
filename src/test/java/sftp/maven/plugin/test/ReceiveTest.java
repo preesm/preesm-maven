@@ -92,4 +92,48 @@ public class ReceiveTest extends AbstractTransfertTestSettings {
     FileUtils.deleteDirectory(createTempDir.toFile());
   }
 
+  @Test
+  public void testReceiveLinkParallel() throws MojoFailureException, IOException {
+    final Path createTempLink = Files.createTempFile("sftpplugin", "link");
+    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/sublink", createTempLink.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+    Files.delete(createTempLink);
+  }
+
+  @Test
+  public void testReceiveDirLinkParallel() throws MojoFailureException, IOException {
+    final Path createTempDirLink = Files.createTempFile("sftpplugin", "dirLink");
+    AbstractTransfertTestSettings.connect();
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/sublinkDir", createTempDirLink.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+    Files.delete(createTempDirLink);
+  }
+
+  @Test
+  public void testReceiveFileParallel() throws MojoFailureException, IOException {
+    final Path createTempFile = Files.createTempFile("sftpplugin", "file");
+    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/subfile1", createTempFile.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+    Files.delete(createTempFile);
+  }
+
+  @Test
+  public void testReceiveEmptyDirParallel() throws MojoFailureException, IOException {
+    final Path createTempDir = Files.createTempDirectory("sftpplugin");
+    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder + "/subdir2", createTempDir.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+    Files.delete(createTempDir);
+  }
+
+  @Test
+  public void testReceiveFilledDirParallel() throws MojoFailureException, IOException {
+    final Path createTempDir = Files.createTempDirectory("sftpplugin");
+    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.transfer("receive", this.remoteFolder, createTempDir.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+    FileUtils.deleteDirectory(createTempDir.toFile());
+  }
 }

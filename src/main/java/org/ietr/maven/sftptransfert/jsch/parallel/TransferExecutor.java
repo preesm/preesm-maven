@@ -7,7 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.ietr.maven.sftptransfert.TransfertException;
 import org.ietr.maven.sftptransfert.jsch.JschSftpTransfertLayer;
-import org.ietr.maven.sftptransfert.transfer.Transfer;
+import org.ietr.maven.sftptransfert.jsch.transfer.Transfer;
 
 public final class TransferExecutor implements Runnable {
 

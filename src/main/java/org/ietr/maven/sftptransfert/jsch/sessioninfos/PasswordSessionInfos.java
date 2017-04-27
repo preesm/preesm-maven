@@ -1,4 +1,4 @@
-package org.ietr.maven.sftptransfert.sessioninfos;
+package org.ietr.maven.sftptransfert.jsch.sessioninfos;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;

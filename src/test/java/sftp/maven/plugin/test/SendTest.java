@@ -12,7 +12,7 @@ import org.junit.Test;
 public class SendTest extends AbstractTransfertTestSettings {
 
   @Test
-  public void testConnect() {
+  public void testConnect() throws MojoFailureException {
     AbstractTransfertTestSettings.connect();
     AbstractTransfertTestSettings.disconnect();
     this.remotePath = null;
@@ -43,6 +43,21 @@ public class SendTest extends AbstractTransfertTestSettings {
   }
 
   @Test
+  public void testOverwriteLink() throws MojoFailureException, IOException {
+    final Path createTempLink = Files.createTempFile("sftpplugin", "link");
+    Files.delete(createTempLink);
+    Files.createSymbolicLink(createTempLink, Paths.get("/"));
+    this.remotePath = "/tmp/tmpLink" + createTempLink.getFileName().toString();
+
+    AbstractTransfertTestSettings.connect();
+    AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempLink.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempLink.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+
+    Files.delete(createTempLink);
+  }
+
+  @Test
 
   public void testSendFile() throws MojoFailureException, IOException {
     final Path createTempFile = Files.createTempFile("sftpplugin", "file");
@@ -50,7 +65,7 @@ public class SendTest extends AbstractTransfertTestSettings {
 
     System.out.println("#####");
     System.out.println("#####");
-    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.connect();
     AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempFile.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
     System.out.println("#####");
@@ -85,6 +100,71 @@ public class SendTest extends AbstractTransfertTestSettings {
     this.remotePath = "/tmp/tmpDir" + createTempDir.getFileName().toString();
 
     AbstractTransfertTestSettings.connect();
+    AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempDir.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+
+    final boolean exists = Files.exists(createTempDir);
+    System.out.println(exists);
+    FileUtils.deleteDirectory(createTempDir.toFile());
+  }
+
+  @Test
+  public void testSendLinkParallel() throws MojoFailureException, IOException {
+    final Path createTempLink = Files.createTempFile("sftpplugin", "link");
+    Files.delete(createTempLink);
+    Files.createSymbolicLink(createTempLink, Paths.get("/"));
+    this.remotePath = "/tmp/tmpLink" + createTempLink.getFileName().toString();
+
+    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempLink.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+
+    Files.delete(createTempLink);
+  }
+
+  @Test
+
+  public void testSendFileParallel() throws MojoFailureException, IOException {
+    final Path createTempFile = Files.createTempFile("sftpplugin", "file");
+    this.remotePath = "/tmp/tmpFile" + createTempFile.getFileName().toString();
+
+    System.out.println("#####");
+    System.out.println("#####");
+    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempFile.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+    System.out.println("#####");
+    System.out.println("#####");
+    Files.delete(createTempFile);
+  }
+
+  @Test
+  public void testSendEmptyDirParallel() throws MojoFailureException, IOException {
+    final Path createTempDir = Files.createTempDirectory("sftpplugin");
+    this.remotePath = "/tmp/tmpDir" + createTempDir.getFileName().toString();
+
+    AbstractTransfertTestSettings.connect(true);
+    AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempDir.toAbsolutePath().toString());
+    AbstractTransfertTestSettings.disconnect();
+
+    Files.delete(createTempDir);
+  }
+
+  @Test
+  public void testSendFilledDirParallel() throws MojoFailureException, IOException {
+    final Path createTempDir = Files.createTempDirectory("sftpplugin");
+    Files.createFile(Paths.get(createTempDir.toString() + "/subfile1"));
+    Files.createSymbolicLink(Paths.get(createTempDir.toString() + "/sublink"), Paths.get("subfile1"));
+    final Path subDir = Files.createTempDirectory(createTempDir, "subdir");
+
+    Files.createSymbolicLink(Paths.get(createTempDir.toString() + "/sublinkDir"), subDir.getFileName());
+
+    Files.createFile(Paths.get(subDir.toString() + "/subfile2"));
+    Files.createSymbolicLink(Paths.get(subDir.toString() + "/sublink"), Paths.get("subfile2"));
+
+    this.remotePath = "/tmp/tmpDir" + createTempDir.getFileName().toString();
+
+    AbstractTransfertTestSettings.connect(true);
     AbstractTransfertTestSettings.transfer("send", this.remotePath, createTempDir.toAbsolutePath().toString());
     AbstractTransfertTestSettings.disconnect();
 

@@ -12,9 +12,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
-import org.ietr.maven.sftptransfert.sessioninfos.PasswordSessionInfos;
-import org.ietr.maven.sftptransfert.sessioninfos.PrivateKeySessionInfos;
-import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.PasswordSessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.PrivateKeySessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.SessionInfos;
 
 @Mojo(name = "sftp-transfert", defaultPhase = LifecyclePhase.NONE)
 public final class SftpTransfertMojo extends AbstractMojo {

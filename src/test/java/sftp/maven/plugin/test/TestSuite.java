@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 
-@Suite.SuiteClasses({ ReceiveTest.class, SendTest.class })
+@Suite.SuiteClasses({ ReceiveTest.class, SendTest.class, FailTest.class, RemoveTest.class, NotConnectedTest.class })
 public class TestSuite {
 
 }

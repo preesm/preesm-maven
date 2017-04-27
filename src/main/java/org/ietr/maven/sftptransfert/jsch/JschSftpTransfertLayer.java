@@ -14,10 +14,10 @@ import java.util.Map;
 import org.ietr.maven.sftptransfert.ISftpTransfertLayer;
 import org.ietr.maven.sftptransfert.TransfertException;
 import org.ietr.maven.sftptransfert.jsch.parallel.ParallelJschSftpTransfertLayer;
-import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
-import org.ietr.maven.sftptransfert.transfer.Receive;
-import org.ietr.maven.sftptransfert.transfer.Send;
-import org.ietr.maven.sftptransfert.transfer.WriteSymLink;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.SessionInfos;
+import org.ietr.maven.sftptransfert.jsch.transfer.Receive;
+import org.ietr.maven.sftptransfert.jsch.transfer.Send;
+import org.ietr.maven.sftptransfert.jsch.transfer.WriteSymLink;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
@@ -46,6 +46,10 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
     } else {
       return new JschSftpTransfertLayer(infos);
     }
+  }
+
+  public final ChannelSftp getMainSftpChannel() {
+    return this.mainSftpChannel;
   }
 
   public final SessionInfos getInfos() {

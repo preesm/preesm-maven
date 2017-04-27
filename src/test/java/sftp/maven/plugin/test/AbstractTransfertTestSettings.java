@@ -2,37 +2,30 @@ package sftp.maven.plugin.test;
 
 import java.text.MessageFormat;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.ietr.maven.sftptransfert.SftpConnection;
-import org.ietr.maven.sftptransfert.sessioninfos.PasswordSessionInfos;
-import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.PasswordSessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.PrivateKeySessionInfos;
+import org.ietr.maven.sftptransfert.jsch.sessioninfos.SessionInfos;
 
-public class AbstractTransfertTestSettings {
+public class AbstractTransfertTestSettings implements Settings {
 
-  static final Log     log                      = new SystemStreamLog();
-  static final String  sftpHost                 = "";
-  static final String  sftpUser                 = "";
-  static final String  sftpPassword             = "";
-  static final int     sftpPort                 = 22;
-  static final boolean strictHostKeyChecking    = false;
-  static final String  sftpPrivateKey           = null;
-  static final String  sftpPrivateKeyPassphrase = null;
+  static final SessionInfos passwdInfos = new PasswordSessionInfos(Settings.sftpHost, Settings.sftpPort, Settings.sftpUser, Settings.strictHostKeyChecking,
+      Settings.sftpPassword);
 
-  static final SessionInfos infos = new PasswordSessionInfos(AbstractTransfertTestSettings.sftpHost, AbstractTransfertTestSettings.sftpPort,
-      AbstractTransfertTestSettings.sftpUser, AbstractTransfertTestSettings.strictHostKeyChecking, AbstractTransfertTestSettings.sftpPassword);
+  static final SessionInfos keyInfos = new PrivateKeySessionInfos(Settings.sftpHost, Settings.sftpPort, Settings.sftpUser, Settings.strictHostKeyChecking,
+      Settings.sftpPrivateKey);
 
   static SftpConnection sftpTransfert;
 
   public static void connect() {
-    AbstractTransfertTestSettings.connect(false);
+    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(AbstractTransfertTestSettings.passwdInfos, false);
   }
 
   static final void connect(final boolean parallel) {
-    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(AbstractTransfertTestSettings.log, AbstractTransfertTestSettings.infos, parallel);
+    AbstractTransfertTestSettings.sftpTransfert = new SftpConnection(Settings.log, AbstractTransfertTestSettings.keyInfos, parallel);
   }
 
-  static final void disconnect() {
+  static final void disconnect() throws MojoFailureException {
     AbstractTransfertTestSettings.sftpTransfert.disconnect();
   }
 
@@ -47,7 +40,7 @@ public class AbstractTransfertTestSettings {
         receivingMode = false;
       } else {
         final String message = MessageFormat.format("Unsupported mode {0}. Supported modes are receive (default) and send.", mode);
-        AbstractTransfertTestSettings.log.error(message);
+        Settings.log.error(message);
         throw new MojoFailureException(message);
       }
     }
