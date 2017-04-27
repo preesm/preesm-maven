@@ -1,4 +1,4 @@
-package org.ietr.maven.sftptransfert.parallel;
+package org.ietr.maven.sftptransfert.transfer;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpException;
@@ -6,7 +6,7 @@ import org.ietr.maven.sftptransfert.TransfertException;
 
 public class Receive extends Transfer {
 
-  protected Receive(final String localPath, final String remotePath) {
+  public Receive(final String localPath, final String remotePath) {
     super(localPath, remotePath);
   }
 

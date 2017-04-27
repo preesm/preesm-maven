@@ -13,6 +13,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
+import org.ietr.maven.sftptransfert.jsch.JschSftpTransfertLayer;
 import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
 
 public class SftpConnection {

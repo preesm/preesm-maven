@@ -1,13 +1,16 @@
-package org.ietr.maven.sftptransfert.parallel;
+package org.ietr.maven.sftptransfert.jsch.parallel;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.ietr.maven.sftptransfert.JschSftpTransfertLayer;
 import org.ietr.maven.sftptransfert.TransfertException;
+import org.ietr.maven.sftptransfert.jsch.JschSftpTransfertLayer;
 import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
+import org.ietr.maven.sftptransfert.transfer.Receive;
+import org.ietr.maven.sftptransfert.transfer.Send;
+import org.ietr.maven.sftptransfert.transfer.Transfer;
 
 public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
 

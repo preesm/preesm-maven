@@ -1,4 +1,4 @@
-package org.ietr.maven.sftptransfert;
+package org.ietr.maven.sftptransfert.jsch;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.ietr.maven.sftptransfert.parallel.ParallelJschSftpTransfertLayer;
+import org.ietr.maven.sftptransfert.ISftpTransfertLayer;
+import org.ietr.maven.sftptransfert.TransfertException;
+import org.ietr.maven.sftptransfert.jsch.parallel.ParallelJschSftpTransfertLayer;
 import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {

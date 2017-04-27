@@ -1,4 +1,4 @@
-package org.ietr.maven.sftptransfert.parallel;
+package org.ietr.maven.sftptransfert.transfer;
 
 import com.jcraft.jsch.ChannelSftp;
 
