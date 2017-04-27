@@ -7,8 +7,6 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +17,7 @@ import org.ietr.maven.sftptransfert.jsch.parallel.ParallelJschSftpTransfertLayer
 import org.ietr.maven.sftptransfert.sessioninfos.SessionInfos;
 import org.ietr.maven.sftptransfert.transfer.Receive;
 import org.ietr.maven.sftptransfert.transfer.Send;
+import org.ietr.maven.sftptransfert.transfer.WriteSymLink;
 
 public class JschSftpTransfertLayer implements ISftpTransfertLayer {
 
@@ -224,23 +223,8 @@ public class JschSftpTransfertLayer implements ISftpTransfertLayer {
   }
 
   @Override
-  public final void writeSymlink(final String remotePath, final String linkPath) {
-    try {
-      final Path path = Paths.get(remotePath);
-      final Path parent = path.getParent();
-      final String linkParentDirPath = parent.toString();
-      // Jsch implementation actually requires to CD first.
-      this.mainSftpChannel.cd(linkParentDirPath);
-      final String actualLinkName = path.getFileName().toString();
-
-      if (isSymlink(remotePath)) {
-        this.mainSftpChannel.rm(actualLinkName);
-      }
-      this.mainSftpChannel.symlink(linkPath, actualLinkName);
-
-    } catch (final SftpException e) {
-      throw new TransfertException("Could not write link", e);
-    }
+  public void writeSymlink(final String remotePath, final String linkPath) {
+    new WriteSymLink(linkPath, remotePath).process(this.mainSftpChannel);
   }
 
   @Override
