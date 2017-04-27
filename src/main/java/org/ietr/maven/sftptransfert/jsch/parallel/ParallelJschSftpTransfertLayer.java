@@ -17,13 +17,12 @@ import org.ietr.maven.sftptransfert.jsch.transfer.WriteSymLink;
 
 public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
 
-  private static final int THREAD_POOL_SIZE = 4;
-
   private BlockingQueue<Transfer> transfers;
   private CountDownLatch          latch;
   private boolean                 addingTransfers;
 
   private volatile TransfertException caughtThrowable = null;
+  private final int                   transferThreadCount;
   private final ThreadFactory         threadFactory   = new ThreadFactoryBuilder().setNameFormat("transfer-thread-%d")
       .setUncaughtExceptionHandler((thread, throwable) -> {
                                                             if (throwable instanceof TransfertException) {
@@ -37,6 +36,7 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
 
   public ParallelJschSftpTransfertLayer(final SessionInfos infos, final int transferThreadCount) {
     super(infos);
+    this.transferThreadCount = transferThreadCount;
   }
 
   @Override
@@ -46,11 +46,11 @@ public class ParallelJschSftpTransfertLayer extends JschSftpTransfertLayer {
   }
 
   private void launchThreads() {
-    this.latch = new CountDownLatch(ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE);
-    this.transfers = new ArrayBlockingQueue<>(ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE * 10);
+    this.latch = new CountDownLatch(transferThreadCount);
+    this.transfers = new ArrayBlockingQueue<>(100);
     this.addingTransfers = true;
-    final ExecutorService threadPool = Executors.newFixedThreadPool(ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE, this.threadFactory);
-    for (int i = 0; i < ParallelJschSftpTransfertLayer.THREAD_POOL_SIZE; i++) {
+    final ExecutorService threadPool = Executors.newFixedThreadPool(transferThreadCount, this.threadFactory);
+    for (int i = 0; i < transferThreadCount; i++) {
       threadPool.execute(new TransferExecutor(i, this));
     }
   }
