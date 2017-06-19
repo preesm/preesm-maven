@@ -8,4 +8,4 @@ Preesm build process and tool setup. It includes:
 *   [preesm-settings](preesm-settings)
 
 The Maven repository is available under [/docs](docs) from the [GitHub 
-Pages](todo).
+Pages](https://preesm.github.io/preesm-maven/).
