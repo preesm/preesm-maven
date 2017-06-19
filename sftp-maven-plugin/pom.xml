@@ -7,14 +7,13 @@
   <artifactId>sftp-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
 
+  <parent>
+    <groupId>org.ietr.preesm.maven</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
   <name>Maven Plugin :: sftp-maven-plugin</name>
-
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -69,67 +68,8 @@
     </dependency>
   </dependencies>
 
-  <distributionManagement>
-    <repository>
-      <id>local.repo</id>
-      <name>local repo</name>
-      <url>${project.baseUri}/target/mavenrepo/</url>
-    </repository>
-  </distributionManagement>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>preesm</id>
-      <url>http://preesm.sourceforge.net/maven/</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
     <plugins>
-      <!-- Make sure deploy to local dir happens before sftp transfert during
-        deploy phase -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-      </plugin>
-      <plugin>
-        <groupId>org.ietr.maven</groupId>
-        <artifactId>sftp-maven-plugin</artifactId>
-        <version>2.0.1</version>
-        <executions>
-          <execution>
-            <id>fetch-existing-repo</id>
-            <phase>install</phase>
-            <configuration>
-              <serverId>sf-preesm-update-site</serverId>
-              <serverHost>web.sourceforge.net</serverHost>
-              <strictHostKeyChecking>false</strictHostKeyChecking>
-              <mode>receive</mode>
-              <remotePath>/home/project-web/preesm/htdocs/maven</remotePath>
-              <localPath>${project.basedir}/target/mavenrepo/</localPath>
-            </configuration>
-            <goals>
-              <goal>sftp-transfert</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>send-merged-repo</id>
-            <phase>deploy</phase>
-            <configuration>
-              <serverId>sf-preesm-update-site</serverId>
-              <serverHost>web.sourceforge.net</serverHost>
-              <strictHostKeyChecking>false</strictHostKeyChecking>
-              <mode>send</mode>
-              <remotePath>/home/project-web/preesm/htdocs/maven</remotePath>
-              <localPath>${project.basedir}/target/mavenrepo/</localPath>
-            </configuration>
-            <goals>
-              <goal>sftp-transfert</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -149,28 +89,6 @@
             <id>help-goal</id>
             <goals>
               <goal>helpmojo</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.20</version>
-        <configuration>
-          <includes>
-            <include>TestSuite.java</include>
-          </includes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.7.9</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>prepare-agent</goal>
             </goals>
           </execution>
         </executions>
