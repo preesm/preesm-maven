@@ -11,5 +11,10 @@
       <prefix>sftp</prefix>
       <artifactId>sftp-maven-plugin</artifactId>
     </plugin>
+    <plugin>
+      <name>Maven Plugin :: m2e-settings-maven-plugin</name>
+      <prefix>m2e-settings</prefix>
+      <artifactId>m2e-settings-maven-plugin</artifactId>
+    </plugin>
   </plugins>
 </metadata>
