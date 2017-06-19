@@ -18,5 +18,6 @@
   <modules>
 	<module>genfeature-maven-plugin</module>
 	<module>sftp-maven-plugin</module>
+	<module>preesm-settings</module>
   </modules>
 </project>
