@@ -4,7 +4,7 @@
 
   <groupId>org.ietr.preesm</groupId>
   <version>1.0.1</version>
-  <artifactId>settings</artifactId>
+  <artifactId>coding-policy</artifactId>
   <packaging>jar</packaging>
 
   <parent>
@@ -13,7 +13,7 @@
     <version>1.0.0</version>
   </parent>
 
-  <name>Preesm :: Tools Settings</name>
+  <name>Preesm :: Coding Policy</name>
 
   <build>
     <defaultGoal>package</defaultGoal>
