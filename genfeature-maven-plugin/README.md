@@ -8,7 +8,7 @@ Default configuration looks as follows :
 <plugin>
 	<groupId>org.ietr.maven</groupId>
 	<artifactId>genfeature-maven-plugin</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<executions>
 		<execution>
 			<phase>package</phase>
@@ -33,7 +33,7 @@ Available through Preesm Maven repository:
 ```xml
 <pluginRepository>
 	<id>preesm</id>
-	<url>http://preesm.sourceforge.net/maven/</url>
+	<url>https://preesm.github.io/preesm-maven/mavenrepo/</url>
 </pluginRepository>
 ```
 
