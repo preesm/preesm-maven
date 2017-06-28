@@ -7,7 +7,7 @@ Default configuration looks as follows:
 <plugin>
 	<groupId>org.ietr.maven</groupId>
 	<artifactId>sftp-maven-plugin</artifactId>
-	<version>1.0.0</version>
+	<version>2.1.0</version>
 	<executions>
 		<execution>
 			<id>test-receive</id>
@@ -53,6 +53,6 @@ Available through Preesm Maven repository:
 ```xml
 <pluginRepository>
 	<id>preesm</id>
-	<url>http://preesm.sourceforge.net/maven/</url>
+	<url>https://preesm.github.io/preesm-maven/mavenrepo/</url>
 </pluginRepository>
 ```
