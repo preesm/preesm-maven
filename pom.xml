@@ -9,6 +9,7 @@
 
   <!-- More Project Information -->
   <name>Preesm Maven</name>
+  <description>This project provides few Maven helper plugins for automating release tasks and auto configuration of the IDE.</description>
 
   <url>http://preesm.org/</url>
 
@@ -24,6 +25,14 @@
     <name>IETR / INSA Rennes - VAADER</name>
     <url>https://www.ietr.fr/spip.php?article1619&amp;lang=en</url>
   </organization>
+
+  <developers>
+    <developer>
+      <id>antoine-morvan</id>
+      <name>Antoine Morvan</name>
+      <email>antoine.morvan@insa-rennes.fr</email>
+    </developer>
+  </developers>
 
   <!-- Environment Settings -->
   <issueManagement>
