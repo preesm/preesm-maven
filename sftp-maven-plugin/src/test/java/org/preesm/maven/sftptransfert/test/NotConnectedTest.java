@@ -3,6 +3,7 @@ package org.preesm.maven.sftptransfert.test;
 import com.jcraft.jsch.ChannelSftp;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.preesm.maven.sftptransfert.TransfertException;
 import org.preesm.maven.sftptransfert.jsch.JschSftpTransfertLayer;
@@ -10,6 +11,7 @@ import org.preesm.maven.sftptransfert.jsch.JschSftpTransfertLayer;
 public class NotConnectedTest extends AbstractTransfertTestSettings {
 
   @Test
+  @Ignore
   public void testNotConnectedSendLink() {
     final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 1);
     build.connect();
@@ -26,6 +28,7 @@ public class NotConnectedTest extends AbstractTransfertTestSettings {
   }
 
   @Test
+  @Ignore
   public void testNotConnectedReceiveFile() {
     final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 1);
     build.connect();
@@ -42,6 +45,7 @@ public class NotConnectedTest extends AbstractTransfertTestSettings {
   }
 
   @Test
+  @Ignore
   public void testNotConnectedSendFile() {
     final JschSftpTransfertLayer build = JschSftpTransfertLayer.build(AbstractTransfertTestSettings.keyInfos, 1);
     build.connect();

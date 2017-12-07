@@ -7,8 +7,10 @@ import java.nio.file.Paths;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class SendTest extends AbstractTransfertTestSettings {
 
   @Test

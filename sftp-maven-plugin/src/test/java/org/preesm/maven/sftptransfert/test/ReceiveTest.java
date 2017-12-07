@@ -8,8 +8,10 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class ReceiveTest extends AbstractTransfertTestSettings {
 
   private String remoteFolder;

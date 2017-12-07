@@ -7,12 +7,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.maven.plugin.MojoFailureException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.preesm.maven.sftptransfert.SftpConnection;
 import org.preesm.maven.sftptransfert.TransfertException;
 import org.preesm.maven.sftptransfert.jsch.JschSftpTransfertLayer;
 import org.preesm.maven.sftptransfert.jsch.sessioninfos.PrivateKeySessionInfos;
 
+@Ignore
 public class FailTest extends AbstractTransfertTestSettings {
 
   @Test
