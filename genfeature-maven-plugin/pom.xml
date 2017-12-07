@@ -2,18 +2,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.ietr.maven</groupId>
-  <version>1.0.1</version>
+  <version>1.0.1-SNAPSHOT</version>
   <artifactId>genfeature-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
 
   <parent>
-    <groupId>org.ietr.preesm.maven</groupId>
+    <groupId>org.preesm.maven</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <name>Maven Plugin :: genfeature-maven-plugin</name>
+  <name>Preesm Maven :: genfeature-maven-plugin</name>
 
   <dependencies>
     <dependency>
