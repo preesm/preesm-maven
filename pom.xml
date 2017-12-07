@@ -4,7 +4,7 @@
 
   <groupId>org.preesm.maven</groupId>
   <artifactId>parent</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
 
   <!-- More Project Information -->
@@ -58,8 +58,6 @@
     <module>genfeature-maven-plugin</module>
     <module>sftp-maven-plugin</module>
     <module>preesm-coding-policy</module>
-    <!--
-     -->
   </modules>
 
 </project>
