@@ -39,7 +39,7 @@ public class PomGenerator {
     final StringBuilder buffer = new StringBuilder();
 
     PomGenerator.headers(buffer);
-    PomGenerator.artifactId("org.ietr.externaldeps.dependency.site", buffer);
+    PomGenerator.artifactId(generateAllInOneP2Feature.project.getGroupId()+".dependency.site", buffer);
     PomGenerator.packaging("eclipse-repository", buffer);
     PomGenerator.parent(generateAllInOneP2Feature.project.getGroupId() + ".parent", generateAllInOneP2Feature.project.getGroupId(),
         generateAllInOneP2Feature.project.getVersion(), "..", buffer);
