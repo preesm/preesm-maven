@@ -47,7 +47,7 @@ public class GenerateAllInOneP2Feature extends AbstractMojo {
   public static final String MAVEN_PROJECT_FILE_NAME = "pom.xml";
 
   /** The Constant TYCHO_VERSION. */
-  public static final String TYCHO_VERSION = "1.0.0";
+  public static final String TYCHO_VERSION = "1.2.0";
 
   /** The project. */
   @Parameter(defaultValue = "${project}", readonly = true, required = true)

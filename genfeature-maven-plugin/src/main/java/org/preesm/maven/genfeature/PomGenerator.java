@@ -46,11 +46,11 @@ public class PomGenerator {
 
     startPlugins(buffer);
 
-    plugin("tycho-maven-plugin", TYCHO_GROUP_ID, GenerateAllInOneP2Feature.TYCHO_VERSION, "<extensions>true</extensions>", buffer);
+    plugin("tycho-maven-plugin", TYCHO_GROUP_ID, "${tycho-version}", "<extensions>true</extensions>", buffer);
 
     String extraConfig = "<configuration>\n" + "<includeAllDependencies>true</includeAllDependencies>\n" + "<compress>false</compress>\n" + "<repositoryName>"
         + generateAllInOneP2Feature.featureProvider + " Update Site</repositoryName>\n" + "</configuration>\n";
-    plugin("tycho-p2-repository-plugin", TYCHO_GROUP_ID, GenerateAllInOneP2Feature.TYCHO_VERSION, extraConfig, buffer);
+    plugin("tycho-p2-repository-plugin", TYCHO_GROUP_ID, "${tycho-version}", extraConfig, buffer);
 
     endPlugins(buffer);
 
@@ -75,46 +75,46 @@ public class PomGenerator {
 
   private static final void plugin(final String artifactId, final String groupId, final String version, final String extraConfig, final StringBuilder buffer) {
 
-    buffer.append("<plugin>\n");
+    buffer.append("      <plugin>\n");
     groupId(groupId, buffer);
     artifactId(artifactId, buffer);
     version(version, buffer);
     buffer.append(extraConfig + "\n");
-    buffer.append("</plugin>\n");
+    buffer.append("      </plugin>\n");
   }
 
   private static void packaging(final String packagingType, final StringBuilder buffer) {
-    buffer.append("<packaging>");
+    buffer.append("  <packaging>");
     buffer.append(packagingType);
     buffer.append("</packaging>\n");
     buffer.append("\n");
   }
 
   private static void parent(final String artifactId, final String groupId, final String version, final String relativePath, final StringBuilder buffer) {
-    buffer.append("<parent>\n");
+    buffer.append("  <parent>\n");
 
     PomGenerator.artifactId(artifactId, buffer);
     PomGenerator.groupId(groupId, buffer);
     PomGenerator.version(version, buffer);
     PomGenerator.relativePath(relativePath, buffer);
 
-    buffer.append("</parent>\n");
+    buffer.append("  </parent>\n");
     buffer.append("\n");
   }
 
   private static void relativePath(final String relativePath, final StringBuilder buffer) {
-    buffer.append("<relativePath>" + relativePath + "</relativePath>\n");
+    buffer.append("    <relativePath>" + relativePath + "</relativePath>\n");
   }
 
   private static void version(final String version, final StringBuilder buffer) {
-    buffer.append("<version>" + version + "</version>\n");
+    buffer.append("    <version>" + version + "</version>\n");
   }
 
   private static void groupId(final String groupId, final StringBuilder buffer) {
-    buffer.append("<groupId>" + groupId + "</groupId>\n");
+    buffer.append("    <groupId>" + groupId + "</groupId>\n");
   }
 
   private static void artifactId(final String artifactId, final StringBuilder buffer) {
-    buffer.append("<artifactId>" + artifactId + "</artifactId>\n");
+    buffer.append("    <artifactId>" + artifactId + "</artifactId>\n");
   }
 }
