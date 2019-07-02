@@ -89,7 +89,7 @@ public class SecondLevelGenerator {
     buffer.append("    <repository>\n");
     buffer.append("      <id>Eclipse</id>\n");
     buffer.append("      <layout>p2</layout>\n");
-    buffer.append("      <url>http://mirror.ibcp.fr/pub/eclipse/releases/photon/</url>\n");
+    buffer.append("      <url>https://download.eclipse.org/releases/latest/</url>\n");
     buffer.append("    </repository>\n");
     buffer.append("  </repositories>\n");
     buffer.append("  \n");
