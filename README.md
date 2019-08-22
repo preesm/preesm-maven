@@ -8,5 +8,4 @@ Preesm build process and tool setup. It includes:
 *   [preesm-coding-policy](preesm-coding-policy)
 *   [m2e-settings-maven-plugin](m2e-settings-maven-plugin)
 
-The Maven repository is available under [/docs](docs) from the [GitHub 
-Pages](https://preesm.github.io/preesm-maven/).
+Artifacts are available in Maven Central (https://mvnrepository.com/artifact/org.preesm.maven).
