@@ -14,6 +14,20 @@
 
   <name>Preesm Maven :: Coding Policy</name>
 
+  
+  <developers>
+    <developer>
+      <id>antoine-morvan</id>
+      <name>Antoine Morvan</name>
+      <email>antoine.morvan.pro@gmail.com</email>
+    </developer>
+    <developer>
+      <id>jheulot</id>
+      <name>Julien Heulot</name>
+      <email>jheulot@insa-rennes.fr</email>
+    </developer>
+  </developers>
+
   <build>
     <defaultGoal>package</defaultGoal>
     <resources>
